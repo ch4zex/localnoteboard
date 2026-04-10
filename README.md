@@ -2,6 +2,8 @@
 
 Hello everyone! Today I'm sharing my personal note dashboard with you. I created it for myself, but I believe some of you might find it useful.
 
+<a href="https://ch4ze.ct.ws/">DEMO</a>
+
 ## Features
 
 This dashboard is designed to be a highly customizable and efficient personal workspace, running entirely in your browser using Local Storage for data persistence.
