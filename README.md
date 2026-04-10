@@ -17,7 +17,6 @@ This dashboard is designed to be a highly customizable and efficient personal wo
 *   **Editable Quicklinks:**
     *   Manage a list of frequently visited URLs directly from the dashboard.
     *   Easy edit mode to add, modify, or remove links.
-    *   **Screenshot:** Quicklinks widget in edit mode.
 *   **Integrated Pomodoro Timer:**
     *   Configurable focus and break durations.
     *   Start, pause, and reset functionalities.
