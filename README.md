@@ -73,7 +73,7 @@ That's it! Your dashboard will load, and all your data will be saved locally in 
 Here are some screenshots to give you an idea of the dashboard's appearance and functionality:
 <div align="center">
     <img src="assets/firstnote.png" width="600" alt="Start" />
-    <img src="assets/instructions.png" width="600" alt="Instructions" />
+    <img src="assets/instruction.png" width="600" alt="Instructions" />
     <img src="assets/timerhtmlhighlight.png" width="600" alt="Hightlights" />
     <img src="assets/fullscreen.png" width="600" alt="Fullscreen" />
   </a> 
