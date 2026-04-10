@@ -55,9 +55,9 @@ This dashboard is designed to be a highly customizable and efficient personal wo
 This dashboard is a single HTML file, making installation incredibly simple!
 
 1.  **Download the file:**
-    *   Download `localstoredash.html` from this repository.
+    *   Download `localnoteboard.html` from this repository.
 2.  **Open in your browser:**
-    *   Simply open the `localstoredash.html` file with your preferred web browser (e.g., Chrome, Firefox, Edge).
+    *   Simply open the `localnoteboard.html` file with your preferred web browser (e.g., Chrome, Firefox, Edge).
 
 That's it! Your dashboard will load, and all your data will be saved locally in your browser.
 
