@@ -173,7 +173,6 @@
             width: 100vw !important;
             height: 100vh !important;
             max-width: none !important;
-            /* Wir ändern den 4. Wert von 225px auf 395px */
             grid-template-columns: minmax(150px, 500px) minmax(800px, 1fr) minmax(150px, 300px);
             grid-template-rows: 150px 225px 1fr 395px 110px; 
             padding: var(--gap);
@@ -672,7 +671,7 @@
             display: flex;
             grid-column: 3;
             grid-row: 5;
-            height: 110px; /* Kompakte, feste Höhe */
+            height: 110px;
         }
 
         .dump-box .controls {
@@ -680,11 +679,11 @@
             gap: 10px;
             flex: 1;
             margin: 8px 0;
-            align-items: stretch; /* Buttons füllen die vertikale Höhe */
+            align-items: stretch;
         }
 
         .dump-box .controls button {
-            flex: 1; /* Buttons füllen die horizontale Breite gleichmäßig */
+            flex: 1;
             font-size: 11px;
             font-weight: bold;
         }
@@ -925,7 +924,7 @@
 
             const scaleX = wrapper.clientWidth / container.offsetWidth;
             const scaleY = wrapper.clientHeight / container.offsetHeight;
-            const scale = Math.min(scaleX, scaleY, 1); // Only scale down, never up
+            const scale = Math.min(scaleX, scaleY, 1);
             container.style.transform = `scale(${scale})`;
         }
 
