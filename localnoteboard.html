@@ -173,6 +173,7 @@
             width: 100vw !important;
             height: 100vh !important;
             max-width: none !important;
+            /* Wir ändern den 4. Wert von 225px auf 395px */
             grid-template-columns: minmax(150px, 500px) minmax(800px, 1fr) minmax(150px, 300px);
             grid-template-rows: 150px 225px 1fr 395px 110px; 
             padding: var(--gap);
@@ -671,7 +672,7 @@
             display: flex;
             grid-column: 3;
             grid-row: 5;
-            height: 110px;
+            height: 110px; /* Kompakte, feste Höhe */
         }
 
         .dump-box .controls {
@@ -679,11 +680,11 @@
             gap: 10px;
             flex: 1;
             margin: 8px 0;
-            align-items: stretch;
+            align-items: stretch; /* Buttons füllen die vertikale Höhe */
         }
 
         .dump-box .controls button {
-            flex: 1;
+            flex: 1; /* Buttons füllen die horizontale Breite gleichmäßig */
             font-size: 11px;
             font-weight: bold;
         }
@@ -924,7 +925,7 @@
 
             const scaleX = wrapper.clientWidth / container.offsetWidth;
             const scaleY = wrapper.clientHeight / container.offsetHeight;
-            const scale = Math.min(scaleX, scaleY, 1);
+            const scale = Math.min(scaleX, scaleY, 1); // Only scale down, never up
             container.style.transform = `scale(${scale})`;
         }
 
@@ -1020,12 +1021,16 @@
         document.querySelector('.links-box').addEventListener('mouseenter', () => editToggle.style.opacity = '0.6');
         document.querySelector('.links-box').addEventListener('mouseleave', () => editToggle.style.opacity = '0');
 
+        const syncLinks = debounce(() => {
+            localStorage.setItem('dash_links', JSON.stringify(links));
+        });
+
         editToggle.addEventListener('click', () => {
             isEditMode = !isEditMode;
             editToggle.textContent = isEditMode ? '×' : '+';
             editToggle.style.color = isEditMode ? 'var(--red)' : 'var(--subtext0)';
             linksGrid.classList.toggle('edit-mode', isEditMode);
-            if (!isEditMode) localStorage.setItem('dash_links', JSON.stringify(links));
+            if (!isEditMode) syncLinks();
             renderLinks();
         });
 
@@ -1042,6 +1047,7 @@
                     nameInput.placeholder = "Name";
                     nameInput.addEventListener('input', (e) => {
                         links[index].name = e.target.value.toUpperCase();
+                        syncLinks();
                     });
 
                     const urlInput = document.createElement('input');
@@ -1052,6 +1058,7 @@
                     urlInput.placeholder = "URL";
                     urlInput.addEventListener('input', (e) => {
                         links[index].url = e.target.value;
+                        syncLinks();
                     });
 
                     container.appendChild(nameInput);
@@ -1782,8 +1789,8 @@
         /** --- INITIALIZATION --- **/
         async function initDashboard() {
             const config = JSON.parse(localStorage.getItem('dash_config')) || {};
-            const serverLinks = JSON.parse(localStorage.getItem('dash_links')) || [];
-            const serverNotes = JSON.parse(localStorage.getItem('dash_notes_tabs')) || [];
+            const savedLinks = localStorage.getItem('dash_links');
+            const savedNotes = localStorage.getItem('dash_notes_tabs');
 
             scratchpadArea.value = localStorage.getItem('dash_scratchpad') || '';
 
@@ -1800,7 +1807,7 @@
             timeLeft = totalTime = focusDurationSeconds;
             updateTimerDisplay();
 
-            if (serverLinks.length === 0) {
+            if (savedLinks === null) {
                 links = [
                     { name: 'GITHUB', url: 'https://github.com' },
                     { name: 'PROXMOX', url: '#' },
@@ -1811,11 +1818,11 @@
                     { name: 'LOCAL_NAS', url: '#' }
                 ];
             } else {
-                links = serverLinks;
+                links = JSON.parse(savedLinks);
             }
             renderLinks();
 
-            if (serverNotes.length === 0) {
+            if (savedNotes === null) {
                 notesData = [{
                     id: Date.now(),
                     name: 'NOTES',
@@ -1824,7 +1831,7 @@
                 }];
                 activeTabId = notesData[0].id;
             } else {
-                notesData = serverNotes;
+                notesData = JSON.parse(savedNotes);
                 activeTabId = config.dash_notes_active_id || (notesData[0] ? notesData[0].id : null);
             }
             
