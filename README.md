@@ -5,7 +5,7 @@ Hello everyone! Today I'm sharing my personal note dashboard with you. I created
       <img src="assets/Fullscreen2.png" width="600" alt="Fullscreen2" />
    </div>
 
-<a href="https://ch4ze.ct.ws/">DEMO</a> Demo may include functions that are not yes included in the release version.
+<a href="https://ch4ze.ct.ws/">DEMO</a> may include functions that are not yet included in the release version.
 
 ## Features
 
