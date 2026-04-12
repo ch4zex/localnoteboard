@@ -92,9 +92,157 @@
             z-index: 5;
         }
 
+        /* Sidebar Wrapper Logic */
+        #left-sidebar {
+            display: contents; /* Verhält sich im Standard-Modus so, als wäre er nicht da */
+        }
+                /* Verhindert, dass zusätzliche Widgets den normalen Grid-Modus beeinflussen */
+        #left-sidebar .scratchpad-box, 
+        #right-sidebar .task-manager-box, 
+        #right-sidebar .dump-box { 
+            display: none; 
+        }
+        .fullscreen-mode #left-sidebar {
+            display: flex;
+            height: 100%;
+            flex-direction: column;
+            gap: var(--gap);
+            grid-column: 1;
+            grid-row: 1 / span 5;
+        }
+
+        /* Right Sidebar Wrapper */
+        #right-sidebar {
+            display: contents;
+        }
+        .fullscreen-mode #right-sidebar {
+            display: flex;
+            height: 100%;
+            flex-direction: column;
+            gap: var(--gap);
+            grid-column: 3;
+            grid-row: 1 / span 5;
+        }
+        /* Re-aktiviert Widgets im Fullscreen-Modus */
+        .fullscreen-mode #left-sidebar .scratchpad-box, 
+        .fullscreen-mode #right-sidebar .task-manager-box, 
+        .fullscreen-mode #right-sidebar .dump-box { 
+            display: flex; 
+        }
+
+        /* Minimierung Styles */
+        .min-btn {
+            display: none;
+            cursor: pointer;
+            margin-left: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--subtext0);
+            transition: color 0.2s;
+            user-select: none;
+        }
+        .fullscreen-mode .min-btn { display: inline-block; }
+        .min-btn:hover { color: var(--green); }
+
+        .min-info {
+            display: none;
+            color: var(--accent);
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .box.minimized .min-info { display: inline; }
+        .box.minimized > *:not(.header) { display: none !important; }
+        .box.minimized { 
+            height: auto !important; 
+            min-height: 0 !important; 
+            padding: 6px 12px !important; 
+            align-self: start !important;
+        }
+        .box.minimized .header { 
+            margin-bottom: 0 !important; 
+            border-bottom: none !important; 
+            padding-bottom: 0 !important;
+        }
+        
+        /* Rail Sidebar Grid Logic (Independent for both sides) */
+        .all-minimized-left.fullscreen-mode {
+            grid-template-columns: 60px 1fr minmax(150px, 300px) !important;
+        }
+        .all-minimized-right.fullscreen-mode {
+            grid-template-columns: minmax(150px, 500px) 1fr 60px !important;
+        }
+        .all-minimized-left.all-minimized-right.fullscreen-mode {
+            grid-template-columns: 60px 1fr 60px !important;
+        }
+
+        .all-minimized-left #left-sidebar, 
+        .all-minimized-right #right-sidebar {
+            gap: 5px;
+        }
+
+        .all-minimized-left #left-sidebar .box.minimized,
+        .all-minimized-right #right-sidebar .box.minimized {
+            flex: 0 0 auto;
+            padding: 15px 0 !important;
+        }
+
+        /* Vertical Resizing for Flex-Widgets */
+        .all-minimized-left #left-sidebar .scratchpad-box.minimized,
+        .all-minimized-right #right-sidebar .task-manager-box.minimized {
+            flex: 1 !important;
+        }
+
+        .all-minimized-left #left-sidebar .box.minimized .header, 
+        .all-minimized-right #right-sidebar .box.minimized .header {
+            writing-mode: vertical-rl;
+            display: flex;
+            flex-direction: row; /* In vertikaler Schreibweise entspricht 'row' der vertikalen Achse */
+            justify-content: center;
+            align-items: center;
+            height: auto;
+            width: 100%;
+            cursor: pointer;
+            white-space: nowrap;
+            gap: 15px;
+            border: none !important;
+        }
+
+        /* Text-Ausrichtung: Links von unten nach oben, Rechts von oben nach unten (beide zur Mitte blickend) */
+        .all-minimized-left #left-sidebar .box.minimized .header { transform: rotate(180deg); }
+        .all-minimized-right #right-sidebar .box.minimized .header { transform: rotate(0deg); }
+
+        .all-minimized-left #left-sidebar .box.minimized .header div,
+        .all-minimized-right #right-sidebar .box.minimized .header div { 
+            flex-direction: row; 
+            gap: 8px; 
+            justify-content: center;
+        }
+        .all-minimized-left #left-sidebar .box.minimized .min-info,
+        .all-minimized-left #left-sidebar .box.minimized .min-btn,
+        .all-minimized-right #right-sidebar .box.minimized .min-info,
+        .all-minimized-right #right-sidebar .box.minimized .min-btn { 
+            margin-left: 0 !important; 
+        }
+        .all-minimized-left #left-sidebar .box.minimized .header div:nth-child(2) .decipher-text,
+        .all-minimized-right #right-sidebar .box.minimized .header div:nth-child(2) .decipher-text { 
+            display: none; 
+        }
+
         .clock-box { grid-column: 1; grid-row: 2; }
         .timer-box { grid-column: 1; grid-row: 3; }
         .links-box { grid-column: 2; grid-row: 2 / span 2; }
+
+        .fullscreen-mode .clock-box, 
+        .fullscreen-mode .timer-box, 
+        .fullscreen-mode .scratchpad-box,
+        .fullscreen-mode .links-box,
+        .fullscreen-mode .task-manager-box,
+        .fullscreen-mode .dump-box {
+            grid-column: auto !important;
+            grid-row: auto !important;
+            width: 100% !important;
+        }
+
         .notes-box { 
             grid-column: 1 / span 2; 
             grid-row: 4; 
@@ -114,10 +262,18 @@
 
         .fullscreen-mode .scratchpad-box {
             display: flex;
-            grid-column: 1;
-            grid-row: 3 / span 3;
+            flex: 1; /* Nimmt im Sidebar-Modus den restlichen Platz ein */
             background-color: #11111b; /* Etwas dunklerer Hintergrund (Crust) */
+            min-height: 0;
         }
+        .fullscreen-mode .scratchpad-box.minimized { flex: 0 0 auto; }
+
+        .fullscreen-mode .task-manager-box {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+        }
+        .fullscreen-mode .task-manager-box.minimized { flex: 0 0 auto; }
 
         .scratchpad-box.scratchpad-hidden {
             display: none !important;
@@ -168,12 +324,12 @@
         .hl-num    { color: var(--peach); }
         .hl-op     { color: var(--sky); }
         .hl-bool   { color: var(--peach); font-weight: bold; }
+        .hl-ts     { color: #ffffff; font-weight: bold; }
 
         #dashboard-container.fullscreen-mode {
             width: 100vw !important;
             height: 100vh !important;
             max-width: none !important;
-            /* Wir ändern den 4. Wert von 225px auf 395px */
             grid-template-columns: minmax(150px, 500px) minmax(800px, 1fr) minmax(150px, 300px);
             grid-template-rows: 150px 225px 1fr 395px 110px; 
             padding: var(--gap);
@@ -181,10 +337,6 @@
             transform: none !important;
         }
 
-        .fullscreen-mode .clock-box { grid-column: 1; grid-row: 1; width: 100%; }
-        .fullscreen-mode .timer-box { grid-column: 1; grid-row: 2; width: 100%; }
-        .fullscreen-mode .links-box { grid-column: 3; grid-row: 4; width: 100%; }
-        
         .fullscreen-mode .notes-box { 
             grid-column: 2; 
             grid-row: 1 / span 5; 
@@ -606,9 +758,9 @@
             display: none;
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
+            padding: 12px;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px;
             scrollbar-width: none;
             font-size: 13px;
         }
@@ -695,29 +847,33 @@
     <div id="dashboard-wrapper">
         <div id="dashboard-container">
 
-            <div class="box clock-box" onmouseenter="triggerHover(this)" onmouseleave="removeHover(this)">
+            <div id="left-sidebar">
+            <div class="box clock-box" onmouseenter="triggerHover(this)" onmouseleave="removeHover(this)" onclick="handleBoxClick(event, 'clock')">
                 <div class="header">
-                    <span class="decipher-text" id="clock-header-text">SYSTEM: TIME_DE</span>
-                    <span class="decipher-text">STATUS: ONLINE</span>
+                    <div style="display: flex; align-items: center;">
+                        <span class="decipher-text" id="clock-header-text">SYSTEM: TIME_DE</span>
+                        <span id="clock-min-info" class="min-info"></span>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <span class="decipher-text">STATUS: ONLINE</span>
+                        <span class="min-btn" onclick="event.stopPropagation(); toggleMinimize(this, 'clock')">[ - ]</span>
+                    </div>
                 </div>
                 <div class="clock-display" id="clock">00:00:00</div>
                 <div class="status-text">> SYNCING_WITH_NTP...</div>
                 <input type="text" id="timezone-input" class="timezone-input" placeholder="Europe/Berlin" spellcheck="false">
             </div>
 
-            <div class="box links-box" onmouseenter="triggerHover(this)" onmouseleave="removeHover(this)">
+            <div class="box timer-box" onmouseenter="triggerHover(this)" onmouseleave="removeHover(this)" onclick="handleBoxClick(event, 'timer')">
                 <div class="header">
-                    <span class="decipher-text">SYSTEM: QUICK_ACCESS</span>
-                    <span id="edit-links-toggle" style="cursor: pointer; opacity: 0; transition: opacity 0.3s; color: var(--subtext0); font-weight: bold; padding: 0 5px; font-size: 22px; line-height: 0.5;">+</span>
-                </div>
-                <div class="links-grid" id="links-grid">
-                </div>
-            </div>
-
-            <div class="box timer-box" onmouseenter="triggerHover(this)" onmouseleave="removeHover(this)">
-                <div class="header">
-                    <span class="decipher-text">SYSTEM: POMODORO</span>
-                    <span id="mode-text" class="decipher-text">MODE: FOCUS</span>
+                    <div style="display: flex; align-items: center;">
+                        <span class="decipher-text">SYSTEM: POMODORO</span>
+                        <span id="timer-min-info" class="min-info"></span>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <span id="mode-text" class="decipher-text">MODE: FOCUS</span>
+                        <span class="min-btn" onclick="event.stopPropagation(); toggleMinimize(this, 'timer')">[ - ]</span>
+                    </div>
                 </div>
                 <div class="timer-display" id="timer">30:00</div>
                 <div class="progress-container" id="progress-container">
@@ -736,27 +892,78 @@
             </div>
 
             <!-- Scratchpad Box -->
-            <div class="box scratchpad-box" id="scratchpad-box" onmouseenter="triggerHover(this)" onmouseleave="removeHover(this)">
+            <div class="box scratchpad-box" id="scratchpad-box" onmouseenter="triggerHover(this)" onmouseleave="removeHover(this)" onclick="handleBoxClick(event, 'scratchpad')">
                 <div class="header">
-                    <span class="decipher-text">SYSTEM: SCRATCHPAD</span>
-                    <span class="decipher-text">STATUS: TEMP_STORAGE</span>
+                    <div style="display: flex; align-items: center;">
+                        <span class="decipher-text">SYSTEM: SCRATCHPAD</span>
+                        <span id="scratchpad-min-info" class="min-info"></span>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <span class="decipher-text">STATUS: TEMP_STORAGE</span>
+                        <span class="min-btn" onclick="event.stopPropagation(); toggleMinimize(this, 'scratchpad')">[ - ]</span>
+                    </div>
                 </div>
                 <textarea id="scratchpad-area" placeholder="> TEMPORARY_DATA_" spellcheck="false"></textarea>
             </div>
+            </div>
 
+            <div id="right-sidebar">
             <!-- Task Manager Box -->
-            <div class="box task-manager-box" onmouseenter="triggerHover(this)" onmouseleave="removeHover(this)">
+            <div class="box task-manager-box" onmouseenter="triggerHover(this)" onmouseleave="removeHover(this)" onclick="handleBoxClick(event, 'taskmanager')">
                 <div class="header">
-                    <span class="decipher-text">SYSTEM: TASK_MANAGER</span>
-                    <span class="decipher-text">STATUS: ACTIVE</span>
+                    <div style="display: flex; align-items: center;">
+                        <span class="decipher-text">SYSTEM: TASK_MANAGER</span>
+                        <span id="task-min-info" class="min-info"></span>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <span id="task-back-btn" class="min-btn" onclick="event.stopPropagation(); backToCategories()" style="display: none; margin-right: 5px; color: var(--mauve);">[ ESC ]</span>
+                        <span class="min-btn" onclick="event.stopPropagation(); toggleMinimize(this, 'taskmanager')">[ - ]</span>
+                    </div>
                 </div>
                 <div class="task-list" id="task-manager-list"></div>
                 <div class="status-text">> TOTAL_PROCESSES: 0</div>
             </div>
 
+            <div class="box links-box" onmouseenter="triggerHover(this)" onmouseleave="removeHover(this)" onclick="handleBoxClick(event, 'links')">
+                <div class="header">
+                    <div style="display: flex; align-items: center;">
+                        <span class="decipher-text">SYSTEM: QUICK_ACCESS</span>
+                        <span id="links-min-info" class="min-info"></span>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <span id="edit-links-toggle" style="cursor: pointer; opacity: 0; transition: opacity 0.3s; color: var(--subtext0); font-weight: bold; padding: 0 5px; font-size: 22px; line-height: 0.5;">+</span>
+                        <span class="min-btn" onclick="event.stopPropagation(); toggleMinimize(this, 'links')">[ - ]</span>
+                    </div>
+                </div>
+                <div class="links-grid" id="links-grid">
+                </div>
+            </div>
+
+            <!-- System Dump Box -->
+            <div class="box dump-box" onmouseenter="triggerHover(this)" onmouseleave="removeHover(this)" onclick="handleBoxClick(event, 'dump')">
+                <div class="header">
+                    <div style="display: flex; align-items: center;">
+                        <span class="decipher-text">SYSTEM: DUMP</span>
+                        <span id="dump-min-info" class="min-info"></span>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <span class="decipher-text">STATUS: LOCAL_ONLY</span>
+                        <span class="min-btn" onclick="event.stopPropagation(); toggleMinimize(this, 'dump')">[ - ]</span>
+                    </div>
+                </div>
+                <div class="controls">
+                    <button id="saveDumpBtn">Save</button>
+                    <button id="loadDumpBtn">Load</button>
+                    <input type="file" id="load-input" style="display: none;" accept=".json">
+                </div>
+                <div class="status-text">> BACKUP_RESTORE_UTILITY</div>
+            </div>
+            </div>
+
             <div class="box notes-box" onmouseenter="triggerHover(this)" onmouseleave="removeHover(this)">
                 <div class="header">
                     <span class="decipher-text">SYSTEM: QUICK_NOTES</span>
+                    <span id="category-display" onclick="backToCategories()" style="color: var(--mauve); font-weight: bold; margin-left: 10px; display: none; cursor: pointer;"></span>
                     <button id="scroll-left-tabs" class="tab-nav-btn">&lt;</button>
                     <div id="notes-tabs-container"></div>
                     <button id="scroll-right-tabs" class="tab-nav-btn">&gt;</button>
@@ -771,20 +978,6 @@
                         <div id="help-view-container"></div>
                     </div>
                 </div>
-            </div>
-
-            <!-- System Dump Box -->
-            <div class="box dump-box" onmouseenter="triggerHover(this)" onmouseleave="removeHover(this)">
-                <div class="header">
-                    <span class="decipher-text">SYSTEM: DUMP</span>
-                    <span class="decipher-text">STATUS: LOCAL_ONLY</span>
-                </div>
-                <div class="controls">
-                    <button id="saveDumpBtn">Save</button>
-                    <button id="loadDumpBtn">Load</button>
-                    <input type="file" id="load-input" style="display: none;" accept=".json">
-                </div>
-                <div class="status-text">> BACKUP_RESTORE_UTILITY</div>
             </div>
 
         </div>
@@ -945,7 +1138,8 @@
                 dash_timezone: currentTimezone,
                 dash_focus_time: focusDurationSeconds / 60,
                 dash_break_time: breakDurationSeconds / 60,
-                dash_notes_active_id: activeTabId
+                dash_notes_active_id: activeTabId,
+                dash_notes_active_cat_id: activeCategoryId
             };
             localStorage.setItem('dash_config', JSON.stringify(config));
         });
@@ -1004,6 +1198,7 @@
                     });
                 }
                 document.getElementById('clock').textContent = timeString;
+                document.getElementById('clock-min-info').textContent = `[ ${timeString} ]`;
             } catch (e) {
                 document.getElementById('clock').textContent = now.toLocaleTimeString('de-DE');
             }
@@ -1133,6 +1328,7 @@
             progressBar.style.backgroundColor = color;
             modeText.style.color = color;
             modeText.textContent = `MODE: ${currentMode}`;
+            document.getElementById('timer-min-info').textContent = `[ ${timerDisplay.textContent} ]`;
 
             if (timeLeft <= 0) handleSessionComplete();
         }
@@ -1273,65 +1469,114 @@
         const notesTabsContainer = document.getElementById('notes-tabs-container');
         const addNoteTabBtn = document.getElementById('add-note-tab');
 
-        let notesData = [];
+        let categoriesData = [];
+        let viewState = 'CATEGORIES'; // 'CATEGORIES' or 'TABS'
+        let activeCategoryId = null;
         let activeTabId = null;
 
         const syncNotes = debounce(() => {
-            localStorage.setItem('dash_notes_tabs', JSON.stringify(notesData));
+            localStorage.setItem('dash_notes_tabs', JSON.stringify(categoriesData));
             syncConfig();
         });
+        
+        function backToCategories() {
+            viewState = 'CATEGORIES';
+            activeTabId = null;
+            showHelpView();
+        }
 
         function renderTaskManager() {
             const taskList = document.getElementById('task-manager-list');
             const taskStatus = document.querySelector('.task-manager-box .status-text');
+            const backBtn = document.getElementById('task-back-btn');
             if (!taskList) return;
+            if (backBtn) backBtn.style.display = (viewState === 'TABS') ? 'inline-block' : 'none';
 
             taskList.innerHTML = '';
-            notesData.forEach(tab => {
-                const item = document.createElement('div');
-                item.className = `task-item ${tab.id == activeTabId ? 'active' : ''}`;
-                item.style.borderLeftColor = tab.color || 'var(--green)';
-                item.textContent = tab.name || 'UNTITLED';
-                item.onclick = () => selectTab(tab.id);
-                taskList.appendChild(item);
-            });
-            if (taskStatus) taskStatus.textContent = `> TOTAL_PROCESSES: ${notesData.length}`;
+            if (viewState === 'CATEGORIES') {
+                categoriesData.forEach(cat => {
+                    const item = document.createElement('div');
+                    item.className = `task-item ${cat.id == activeCategoryId ? 'active' : ''}`;
+                    item.style.borderLeftColor = cat.color || 'var(--green)';
+                    item.textContent = cat.name || 'UNTITLED_CAT';
+                    item.onclick = () => selectCategory(cat.id);
+                    taskList.appendChild(item);
+                });
+                if (taskStatus) {
+                    taskStatus.textContent = `> TOTAL_CATEGORIES: ${categoriesData.length}`;
+                    document.getElementById('task-min-info').textContent = `[ ${categoriesData.length} CAT ]`;
+                }
+            } else {
+                const currentCat = categoriesData.find(c => c.id === activeCategoryId);
+                if (!currentCat) return;
+                currentCat.tabs.forEach(tab => {
+                    const item = document.createElement('div');
+                    item.className = `task-item ${tab.id == activeTabId ? 'active' : ''}`;
+                    item.style.borderLeftColor = tab.color || 'var(--green)';
+                    item.textContent = tab.name || 'UNTITLED';
+                    item.onclick = () => selectTab(tab.id);
+                    taskList.appendChild(item);
+                });
+                if (taskStatus) {
+                    taskStatus.textContent = `> ${currentCat.name}: ${currentCat.tabs.length} TABS`;
+                    document.getElementById('task-min-info').textContent = `[ ${currentCat.tabs.length} TABS ]`;
+                }
+            }
         }
 
         function renderTabs() {
             notesTabsContainer.innerHTML = '';
-            notesData.forEach(tab => {
-                if (!tab.color) {
-                    tab.color = catppuccinAccentColors[Math.floor(Math.random() * catppuccinAccentColors.length)];
+            const catDisplay = document.getElementById('category-display');
+            
+            if (viewState === 'CATEGORIES') {
+                catDisplay.style.display = 'none';
+                categoriesData.forEach(cat => {
+                    renderItem(cat, true);
+                });
+            } else {
+                const currentCat = categoriesData.find(c => c.id === activeCategoryId);
+                if (currentCat) {
+                    catDisplay.textContent = `[ ${currentCat.name} ]`;
+                    catDisplay.style.display = 'inline';
+                    catDisplay.style.color = currentCat.color;
+                    currentCat.tabs.forEach(tab => {
+                        renderItem(tab, false);
+                    });
                 }
-
-                const tabEl = document.createElement('div');
-                tabEl.className = `note-tab ${tab.id == activeTabId ? 'active' : ''}`;
-                if (tab.id == activeTabId) tabEl.style.borderBottomColor = tab.color;
-
-                const input = document.createElement('input');
-                input.className = 'tab-name-input';
-                input.value = tab.name;
-                input.spellcheck = false;
-                
-                input.addEventListener('input', (e) => {
-                    tab.name = e.target.value.toUpperCase();
-                    syncNotes();
-                    renderTaskManager();
-                });
-                if (tab.id == activeTabId) input.style.color = tab.color;
-                input.addEventListener('click', (e) => {
-                    if (tab.id != activeTabId) selectTab(tab.id);
-                    e.stopPropagation();
-                });
-
-                tabEl.appendChild(input);
-
-                tabEl.onclick = () => selectTab(tab.id);
-                notesTabsContainer.appendChild(tabEl);
-                updateScrollButtonsState();
-            });
+            }
             renderTaskManager();
+            updateScrollButtonsState();
+        }
+
+        function renderItem(data, isCategory) {
+            if (!data.color) {
+                data.color = catppuccinAccentColors[Math.floor(Math.random() * catppuccinAccentColors.length)];
+            }
+
+            const el = document.createElement('div');
+            const isActive = isCategory ? data.id == activeCategoryId : data.id == activeTabId;
+            el.className = `note-tab ${isActive ? 'active' : ''}`;
+            if (isActive) el.style.borderBottomColor = data.color;
+
+            const input = document.createElement('input');
+            input.className = 'tab-name-input';
+            input.value = data.name;
+            input.spellcheck = false;
+            
+            input.addEventListener('input', (e) => {
+                data.name = e.target.value.toUpperCase();
+                syncNotes();
+                renderTaskManager();
+            });
+            if (isActive) input.style.color = data.color;
+            input.addEventListener('click', (e) => {
+                isCategory ? selectCategory(data.id) : selectTab(data.id);
+                e.stopPropagation();
+            });
+
+            el.appendChild(input);
+            el.onclick = () => isCategory ? selectCategory(data.id) : selectTab(data.id);
+            notesTabsContainer.appendChild(el);
         }
 
         /** --- TODO WIDGET LOGIC --- **/
@@ -1410,13 +1655,15 @@
                         deleteBtn.textContent = 'DELETE_THIS_TAB';
                     }, 3000);
                 } else {
-                    notesData = notesData.filter(t => t.id !== tab.id);
-                    if (notesData.length === 0) {
+                    const currentCat = categoriesData.find(c => c.id === activeCategoryId);
+                    currentCat.tabs = currentCat.tabs.filter(t => t.id !== tab.id);
+                    
+                    if (currentCat.tabs.length === 0) {
                         const newId = Date.now();
-                        notesData.push({ id: newId, name: 'NOTES', content: '', color: 'var(--green)' });
+                        currentCat.tabs.push({ id: newId, name: 'NOTES', content: '', color: 'var(--green)' });
                         selectTab(newId);
                     } else {
-                        selectTab(notesData[0].id);
+                        selectTab(currentCat.tabs[0].id);
                     }
                     renderTabs();
                 }
@@ -1451,7 +1698,7 @@
                     <div class="help-item"><span class="help-key">Space + W</span><span class="help-desc">Create a new note tab instantly.</span></div>
                 </div>
                 <div class="help-section">
-                    <div class="help-title">Navigation & Selection</div>
+                    <div class="help-title">Note Navigation & Selection</div>
                     <div class="help-item"><span class="help-key">Space + [1-9]</span><span class="help-desc">Switch directly to specific note tab.</span></div>
                     <div class="help-item"><span class="help-key">Space + ←/→</span><span class="help-desc">Cycle through your tabs.</span></div>
                     <div class="help-item"><span class="help-key">Tab</span><span class="help-desc">Toggle focus between Dashboard and Editor.</span></div>
@@ -1464,9 +1711,15 @@
                 <div class="help-section">
                     <div class="help-title">Editor Magic (First Line)</div>
                     <div class="help-item"><span class="help-key">:title</span><span class="help-desc">Set title for current tab ":title Test" (works in any line)</span></div>
+                    <div class="help-item"><span class="help-key">:ts</span><span class="help-desc">Insert current timestamp based on selected timezone.</span></div>
                     <div class="help-item"><span class="help-key">:todo</span><span class="help-desc">Transform current tab into an interactive Todo List.</span></div>
                     <div class="help-item"><span class="help-key">:html</span><span class="help-desc">Enable Syntax Highlighting for HTML, CSS, and JS.</span></div>
                     <div class="help-item"><span class="help-key">:help</span><span class="help-desc">Show this documentation again.</span></div>
+                </div>
+                <div class="help-section">
+                    <div class="help-title">Fullscreen Controls</div>
+                    <div class="help-item"><span class="help-key">Space + S</span><span class="help-desc">Focus on the Scratchpad</span></div>
+                    <div class="help-item"><span class="help-key">Space + M</span><span class="help-desc">Minimize/Maximize all Widgets</span></div>
                 </div>
                 <div style="margin-top: 20px; color: var(--mauve); font-size: 11px; opacity: 0.6;">
                     > See all functions on <span style="color: var(--green)">https://github.com/ch4zex/localnoteboard</span>
@@ -1474,9 +1727,16 @@
             `;
         }
 
-        function selectTab(id, shouldFocus = true) {
+        function findTab(id) {
+            for (let cat of categoriesData) {
+                let tab = cat.tabs.find(t => t.id == id);
+                if (tab) return { tab, cat };
+            }
+            return { tab: null, cat: null };
+        }
 
-            const oldTab = notesData.find(t => t.id == activeTabId);
+        function selectTab(id, shouldFocus = true) {
+            const { tab: oldTab } = findTab(activeTabId);
             if (oldTab && id !== activeTabId) {
                 if (oldTab.content.startsWith('!!HTML!!')) {
                     oldTab.content = '!!HTML!!' + notesArea.value;
@@ -1496,14 +1756,18 @@
                     isEmpty = oldTab.content.trim() === '';
                 }
 
-                if (isEmpty && notesData.length > 1) {
-                    notesData = notesData.filter(t => t.id !== oldTab.id);
+                const { cat: oldCat } = findTab(oldTab.id);
+                if (isEmpty && oldCat && oldCat.tabs.length > 1) {
+                    oldCat.tabs = oldCat.tabs.filter(t => t.id !== oldTab.id);
                 }
             }
 
             helpViewContainer.style.display = 'none';
             activeTabId = id;
-            const targetTab = notesData.find(t => t.id == id);
+            const { tab: targetTab, cat: targetCat } = findTab(id);
+            if (targetCat) activeCategoryId = targetCat.id;
+            
+            viewState = 'TABS';
             
             const isTodo = targetTab && targetTab.content.startsWith('!!TODO!!');
             const isHTML = targetTab && targetTab.content.startsWith('!!HTML!!');
@@ -1539,70 +1803,198 @@
             updateLineNumbers();
             autoResizeNotes();
             if (shouldFocus && !isTodo) {
-                notesArea.focus();
+                setTimeout(() => notesArea.focus(), 0);
             }
         }
         
-        function switchTabRelative(direction, shouldFocus = true) {
-            if (notesData.length <= 1) return;
-            
-            const currentIndex = notesData.findIndex(t => t.id === activeTabId);
-            let nextIndex = currentIndex + direction;
-
-            if (nextIndex < 0) nextIndex = notesData.length - 1;
-            if (nextIndex >= notesData.length) nextIndex = 0;
-
-            selectTab(notesData[nextIndex].id, shouldFocus);
+        function selectCategory(id) {
+            activeCategoryId = id;
+            viewState = 'TABS';
+            const cat = categoriesData.find(c => c.id === id);
+            if (cat && cat.tabs.length > 0) {
+                selectTab(cat.tabs[0].id, false);
+            } else if (cat) {
+                addNoteTab(false);
+            }
         }
 
-        addNoteTabBtn.addEventListener('click', () => {
+        function switchTabRelative(direction, shouldFocus = true) {
+            if (viewState === 'CATEGORIES') {
+                if (categoriesData.length <= 1) return;
+                const idx = categoriesData.findIndex(c => c.id === activeCategoryId);
+                let next = idx + direction;
+                if (next < 0) next = categoriesData.length - 1;
+                if (next >= categoriesData.length) next = 0;
+                activeCategoryId = categoriesData[next].id;
+                renderTabs();
+            } else {
+                const cat = categoriesData.find(c => c.id === activeCategoryId);
+                if (!cat || cat.tabs.length <= 1) return;
+                const idx = cat.tabs.findIndex(t => t.id === activeTabId);
+                let next = idx + direction;
+                if (next < 0) next = cat.tabs.length - 1;
+                if (next >= cat.tabs.length) next = 0;
+                selectTab(cat.tabs[next].id, shouldFocus);
+            }
+        }
+
+        function addNoteTab(shouldFocus = true) {
+            const currentCat = categoriesData.find(c => c.id === activeCategoryId);
+            if (!currentCat) return;
             const newId = Date.now();
-            notesData.push({ 
+            currentCat.tabs.push({ 
                 id: newId, 
                 name: 'NEW_TAB', 
                 content: '',
                 color: catppuccinAccentColors[Math.floor(Math.random() * catppuccinAccentColors.length)]
             });
-            selectTab(newId);
-            updateScrollButtonsState();
-        });
-        notesArea.addEventListener('input', () => {
-            const currentTab = notesData.find(t => t.id == activeTabId);
-            if (currentTab) {
-                if (notesArea.value.startsWith(':todo\n') || notesArea.value.startsWith(':todo\r\n')) {
-                    currentTab.content = '!!TODO!!' + JSON.stringify([{ text: 'First task...', done: false }]);
-                    selectTab(currentTab.id);
-                    return;
-                }
+            selectTab(newId, shouldFocus);
+        }
 
-                if (notesArea.value.startsWith(':help\n') || notesArea.value.startsWith(':help\r\n')) {
-                    showHelpView();
-                    return;
-                }
+        notesArea.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const pos = notesArea.selectionStart;
+                const text = notesArea.value;
+                const startOfLine = text.lastIndexOf('\n', pos - 1) + 1;
+                const currentLine = text.substring(startOfLine, pos).trim();
 
-                if (notesArea.value.startsWith(':html\n') || notesArea.value.startsWith(':html\r\n')) {
-                    currentTab.content = '!!HTML!!';
-                    selectTab(currentTab.id);
-                    return;
-                }
+                const { tab: currentTab, cat: currentCat } = findTab(activeTabId);
+                if (!currentTab) return;
 
-                const titleRegex = /(^|\n):title\s+(.*)\n/;
-                const titleMatch = notesArea.value.match(titleRegex);
-                if (titleMatch) {
-                    const newTitle = titleMatch[2].trim().toUpperCase();
+                // Check for :title [NAME]
+                if (currentLine.toLowerCase().startsWith(':title ')) {
+                    const newTitle = currentLine.substring(7).trim().toUpperCase();
                     if (newTitle) {
+                        e.preventDefault();
                         currentTab.name = newTitle;
-                        const matchStart = titleMatch.index;
-                        const leadingNewline = titleMatch[1];
-                        
-                        notesArea.value = notesArea.value.replace(titleRegex, '$1');
-                        
-                        const newPos = matchStart + leadingNewline.length;
-                        notesArea.setSelectionRange(newPos, newPos);
+                        const before = text.substring(0, startOfLine);
+                        const after = text.substring(pos);
+                        notesArea.value = before + after;
+                        currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
+                        notesArea.setSelectionRange(startOfLine, startOfLine);
                         renderTabs();
+                        syncNotes();
+                        updateLineNumbers();
+                        autoResizeNotes();
+                        return;
                     }
                 }
-                
+
+                // Check for :cat [NAME] (Rename Category)
+                if (currentLine.toLowerCase().startsWith(':cat ')) {
+                    const newCatName = currentLine.substring(5).trim().toUpperCase();
+                    if (newCatName && currentCat) {
+                        e.preventDefault();
+                        currentCat.name = newCatName;
+                        const before = text.substring(0, startOfLine);
+                        const after = text.substring(pos);
+                        notesArea.value = before + after;
+                        currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
+                        notesArea.setSelectionRange(startOfLine, startOfLine);
+                        renderTabs();
+                        syncNotes();
+                        return;
+                    }
+                }
+
+                // Color Commands (tabred, catred, etc.)
+                const colorCmdMatch = currentLine.toLowerCase().match(/^:(tab|cat)(red|green|blue|mauve|peach)$/);
+                if (colorCmdMatch) {
+                    e.preventDefault();
+                    const targetType = colorCmdMatch[1]; // "tab" or "cat"
+                    const colorName = colorCmdMatch[2];  // "red", "green", etc.
+                    const colorVar = `var(--${colorName})`;
+
+                    if (targetType === 'tab') {
+                        currentTab.color = colorVar;
+                        notesArea.style.color = colorVar; // Immediate update for editor
+                    } else if (targetType === 'cat' && currentCat) {
+                        currentCat.color = colorVar;
+                    }
+
+                    const before = text.substring(0, startOfLine);
+                    const after = text.substring(pos);
+                    notesArea.value = before + after;
+                    currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
+                    notesArea.setSelectionRange(startOfLine, startOfLine);
+                    renderTabs();
+                    syncNotes();
+                    updateLineNumbers();
+                    autoResizeNotes();
+                    return;
+                }
+
+                // Check for :ts (Timestamp)
+                if (currentLine.toLowerCase() === ':ts') {
+                    e.preventDefault();
+                    const now = new Date();
+                    const utcRegex = /^UTC\s*([+-])\s*(\d+)$/i;
+                    const match = currentTimezone.match(utcRegex);
+                    let ts = "";
+                    try {
+                        const opt = { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' };
+                        if (match) {
+                            const offset = (match[1] === '+' ? 1 : -1) * parseInt(match[2]) * 3600000;
+                            ts = new Date(now.getTime() + offset).toLocaleString('de-DE', { ...opt, timeZone: 'UTC' });
+                        } else {
+                            ts = now.toLocaleString('de-DE', { ...opt, timeZone: currentTimezone });
+                        }
+                    } catch (err) { ts = now.toLocaleString('de-DE'); }
+
+                    const before = text.substring(0, startOfLine);
+                    const after = text.substring(pos);
+                    notesArea.value = before + ts + after;
+                    currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
+                    const newPos = startOfLine + ts.length;
+                    notesArea.setSelectionRange(newPos, newPos);
+                    syncNotes();
+                    updateLineNumbers();
+                    autoResizeNotes();
+                    return;
+                }
+
+                // Check for other toggle commands
+                if (currentLine === ':todo' || currentLine === ':help' || currentLine === ':html') {
+                    e.preventDefault();
+                    const before = text.substring(0, startOfLine);
+                    const after = text.substring(pos);
+                    notesArea.value = before + after;
+                    currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
+                    notesArea.setSelectionRange(startOfLine, startOfLine);
+
+                    if (currentLine === ':todo') {
+                        currentTab.content = '!!TODO!!' + JSON.stringify([{ text: 'First task...', done: false }]);
+                        selectTab(currentTab.id);
+                    } else if (currentLine === ':help') {
+                        showHelpView();
+                    } else if (currentLine === ':html') {
+                        currentTab.content = '!!HTML!!';
+                        selectTab(currentTab.id);
+                    }
+                    return;
+                }
+            }
+        });
+
+
+        function addCategory() {
+            const newId = Date.now();
+            categoriesData.push({
+                id: newId,
+                name: 'NEW_CATEGORY',
+                color: catppuccinAccentColors[Math.floor(Math.random() * catppuccinAccentColors.length)],
+                tabs: []
+            });
+            renderTabs();
+        }
+
+        addNoteTabBtn.addEventListener('click', () => {
+            viewState === 'CATEGORIES' ? addCategory() : addNoteTab();
+        });
+
+        notesArea.addEventListener('input', () => {
+            const { tab: currentTab } = findTab(activeTabId);
+            if (currentTab) {
                 currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
                 syncNotes();
             }
@@ -1669,6 +2061,13 @@
                 }
             }
 
+                        
+            if (e.code === 'Escape' && isSpacePressed) {
+                e.preventDefault();
+                backToCategories();
+                return;
+            }
+
             if (e.code === 'Tab') {
                 e.preventDefault();
                 if (isTyping) {
@@ -1680,16 +2079,19 @@
             }
 
             if (isSpacePressed && !isTyping) {
-                if (['KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyF', 'KeyS', 'ArrowLeft', 'ArrowRight'].includes(e.code) || e.code.startsWith('Digit')) {
-                    e.preventDefault();
-                }
-
                 if (e.code.startsWith('Digit')) {
                     const num = parseInt(e.code.replace('Digit', ''));
                     if (num >= 1 && num <= 9) {
                         const targetIndex = num - 1;
-                        if (notesData[targetIndex]) {
-                            selectTab(notesData[targetIndex].id, false);
+                        if (viewState === 'CATEGORIES') {
+                            if (categoriesData[targetIndex]) {
+                                selectCategory(categoriesData[targetIndex].id);
+                            }
+                        } else {
+                            const cat = categoriesData.find(c => c.id === activeCategoryId);
+                            if (cat && cat.tabs[targetIndex]) {
+                                selectTab(cat.tabs[targetIndex].id, false);
+                            }
                         }
                         return;
                     }
@@ -1698,6 +2100,16 @@
                 switch (e.code) {
                     case 'KeyF':
                         container.classList.toggle('fullscreen-mode');
+                        // Reset View Logic: Wenn Fullscreen verlassen wird, alle minimierten Widgets maximieren
+                        if (!container.classList.contains('fullscreen-mode')) {
+                            document.querySelectorAll('.box.minimized').forEach(box => {
+                                box.classList.remove('minimized');
+                                const btn = box.querySelector('.min-btn');
+                                if (btn) btn.textContent = '[ - ]';
+                            });
+                            // Rail-Status am Container ebenfalls zurücksetzen
+                            container.classList.remove('all-minimized-left', 'all-minimized-right');
+                        }
                         handleScaling(); 
                         updateLineNumbers();
                         break;
@@ -1715,6 +2127,19 @@
                             if (typeof updateLineNumbers === 'function') updateLineNumbers();
                         }
                         break;
+                    case 'KeyM':
+                        if (container.classList.contains('fullscreen-mode')) {
+                            const minBtns = document.querySelectorAll('.box .min-btn');
+                            const anyOpen = Array.from(minBtns).some(btn => !btn.closest('.box').classList.contains('minimized'));
+                            
+                            minBtns.forEach(btn => {
+                                const isMinimized = btn.closest('.box').classList.contains('minimized');
+                                if (anyOpen ? !isMinimized : isMinimized) {
+                                    toggleMinimize(btn, '');
+                                }
+                            });
+                        }
+                        break;
                     case 'KeyW':
                         if (addNoteTabBtn) addNoteTabBtn.click();
                         break;
@@ -1726,18 +2151,62 @@
                         break;
                     case 'KeyS':
                         if (window.getComputedStyle(scratchpadBox).display !== 'none') {
-                            scratchpadArea.focus();
+                            setTimeout(() => scratchpadArea.focus(), 0);
                         }
                         break;
                 }
             }
-        });
+        }
+        );
 
         window.addEventListener('keyup', (e) => {
             if (e.code === 'Space') {
                 isSpacePressed = false;
             }
         });
+
+        /** --- MINIMIZE LOGIC --- **/
+        function toggleMinimize(btn, type) {
+            const container = document.getElementById('dashboard-container');
+            if (!container.classList.contains('fullscreen-mode')) return;
+
+            const box = btn.closest('.box');
+            const isMinimized = box.classList.toggle('minimized');
+            btn.textContent = isMinimized ? '[ + ]' : '[ - ]';
+            
+            updateRailStatus();
+            handleScaling();
+        }
+
+        function handleBoxClick(event, type) {
+            const container = document.getElementById('dashboard-container');
+            if (!container.classList.contains('fullscreen-mode')) return;
+
+            // Ignoriere Klicks auf interaktive Elemente
+            if (event.target.closest('input, button, a, textarea, #edit-links-toggle')) return;
+
+            const box = event.currentTarget;
+            const btn = box.querySelector('.min-btn');
+            if (btn && (box.classList.contains('minimized') || event.target.closest('.header'))) toggleMinimize(btn, type);
+        }
+
+        function updateRailStatus() {
+            const sidebarL = document.getElementById('left-sidebar');
+            const sidebarR = document.getElementById('right-sidebar');
+            const container = document.getElementById('dashboard-container');
+            if (!container) return;
+            
+            if (sidebarL) {
+                const boxesL = sidebarL.querySelectorAll('.box');
+                const allMinL = Array.from(boxesL).every(box => box.classList.contains('minimized'));
+                container.classList.toggle('all-minimized-left', allMinL);
+            }
+            if (sidebarR) {
+                const boxesR = sidebarR.querySelectorAll('.box');
+                const allMinR = Array.from(boxesR).every(box => box.classList.contains('minimized'));
+                container.classList.toggle('all-minimized-right', allMinR);
+            }
+        }
 
         /** --- SYSTEM DUMP LOGIC --- **/
         const saveDumpBtn = document.getElementById('saveDumpBtn');
@@ -1823,19 +2292,34 @@
             renderLinks();
 
             if (savedNotes === null) {
-                notesData = [{
+                categoriesData = [{
                     id: Date.now(),
-                    name: 'NOTES',
-                    content: '',
-                    color: catppuccinAccentColors[Math.floor(Math.random() * catppuccinAccentColors.length)]
+                    name: 'CATEGORY 1',
+                    color: catppuccinAccentColors[0],
+                    tabs: [{
+                        id: Date.now() + 1,
+                        name: 'NOTES',
+                        content: '',
+                        color: catppuccinAccentColors[0]
+                    }]
                 }];
-                activeTabId = notesData[0].id;
             } else {
-                notesData = JSON.parse(savedNotes);
-                activeTabId = config.dash_notes_active_id || (notesData[0] ? notesData[0].id : null);
+                const parsed = JSON.parse(savedNotes);
+                // Migration: Check if old flat format
+                if (Array.isArray(parsed) && parsed.length > 0 && !parsed[0].tabs) {
+                    categoriesData = [{
+                        id: Date.now(),
+                        name: 'CATEGORY 1',
+                        color: catppuccinAccentColors[0],
+                        tabs: parsed
+                    }];
+                } else {
+                    categoriesData = parsed;
+                }
             }
             
-            if (notesData.length > 0) {
+            if (categoriesData.length > 0) {
+                viewState = 'CATEGORIES';
                 showHelpView();
                 renderTabs();
             }
