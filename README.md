@@ -1,8 +1,9 @@
 # Local Note Dashboard
 
 Hello everyone! Today I'm sharing my personal note dashboard with you. I created it for myself, but I believe some of you might find it useful.
-
-<img src="assets/Fullscreen2.png" width="600" alt="Fullscreen2" />
+   <div align="center">
+      <img src="assets/Fullscreen2.png" width="600" alt="Fullscreen2" />
+   </div>
 
 <a href="https://ch4ze.ct.ws/">DEMO</a>
 
