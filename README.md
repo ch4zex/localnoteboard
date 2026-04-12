@@ -5,7 +5,7 @@ Hello everyone! Today I'm sharing my personal note dashboard with you. I created
       <img src="assets/Fullscreen2.png" width="600" alt="Fullscreen2" />
    </div>
 
-<a href="https://ch4ze.ct.ws/">DEMO</a>
+<a href="https://ch4ze.ct.ws/">DEMO</a> Demo may include functions that are not yes included in the release version.
 
 ## Features
 
@@ -22,12 +22,19 @@ This dashboard is designed to be a highly customizable and efficient personal wo
 *   **Editable Quicklinks:**
     *   Manage a list of frequently visited URLs directly from the dashboard.
     *   Easy edit mode to add, modify, or remove links.
+*   **Scratchpad Widget:**
+    *   A dedicated sidebar area for temporary text storage and quick drafting.
+    *   Perfect for transient data that doesn't need a persistent note tab.
 *   **Integrated Pomodoro Timer:**
     *   Configurable focus and break durations.
     *   Start, pause, and reset functionalities.
     *   Visual progress bar with seek capability.
     *   Audible beep on session completion.
     *   **Screenshot:** Pomodoro timer in focus mode, progress bar partially filled.
+*   **System Navigation & Layout:**
+    *   **Task Manager:** A central sidebar widget providing an overview of all categories and tabs for rapid navigation.
+    *   **Categorization:** Organize your note tabs into logical parent categories for superior structure.
+    *   **Smart Minimization (Rail Mode):** Minimize sidebar widgets in fullscreen mode into slim rails with vertical titles to maximize your editing workspace.
 *   **Advanced Quick Notes System:**
     *   **Multiple Tabs:** Organize your thoughts across various note tabs.
     *   **Tab Naming:** Rename tabs directly by clicking on their name.
@@ -38,6 +45,9 @@ This dashboard is designed to be a highly customizable and efficient personal wo
 *   **Powerful Note Commands (Type in any line, press Enter):**
     *   `:title [Your New Title]` - Changes the name of the current tab. (e.g., `:title Shopping List`)
         *   **Screenshot:** Notes area with `:title` command typed, then a screenshot of the tab name updated.
+    *   `:cat [Name]` - Renames the currently active category.
+    *   `:ts` - Inserts the current localized timestamp based on your configured timezone.
+    *   `:tab[color]` / `:cat[color]` - Changes the accent color for the tab or category (supported: `red`, `green`, `blue`, `mauve`, `peach`).
     *   `:todo` - Transforms the current tab into an interactive Todo List.
         *   **Screenshot:** Notes tab converted to a todo list with a few items.
     *   `:html` - Activates syntax highlighting for HTML, CSS, and JavaScript code within the tab.
@@ -51,8 +61,14 @@ This dashboard is designed to be a highly customizable and efficient personal wo
     *   `Space + [1-9]`: Switch directly to a specific note tab.
     *   `Space + ←/→`: Cycle through note tabs.
     *   `Tab`: Toggle focus between dashboard elements and the notes editor.
+    *   `Space + M`: Toggle minimize/maximize for all sidebar widgets in fullscreen mode.
+    *   `Space + S`: Jump focus directly to the Scratchpad area.
+    *   `Space + Escape`: Exit the current tab view and return to the category overview.
     *   `Space + E`: Start/Resume Pomodoro timer.
     *   `Space + R`: Reset Pomodoro timer.
+*   **System Backup & Restore:**
+    *   **Export Dump:** Save your entire dashboard state (config, links, and notes) to a `.json` file for backup.
+    *   **Import Dump:** Restore your data or migrate between browsers using the System Dump utility.
 *   **Local Storage Persistence:** All your settings, links, and notes are automatically saved in your browser's local storage, ensuring your data is retained even after closing the browser.
 
 ## Installation
