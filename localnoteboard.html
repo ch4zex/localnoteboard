@@ -1470,7 +1470,7 @@
         const addNoteTabBtn = document.getElementById('add-note-tab');
 
         let categoriesData = [];
-        let viewState = 'CATEGORIES'; // 'CATEGORIES' or 'TABS'
+        let viewState = 'CATEGORIES';
         let activeCategoryId = null;
         let activeTabId = null;
 
@@ -1480,6 +1480,34 @@
         });
         
         function backToCategories() {
+            if (activeCategoryId && categoriesData.length > 1) {
+                const catIndex = categoriesData.findIndex(c => c.id === activeCategoryId);
+                if (catIndex !== -1) {
+                    const cat = categoriesData[catIndex];
+                    if (cat.tabs.length === 1) {
+                        const tab = cat.tabs[0];
+                        let isEmpty = false;
+                        
+                        if (tab.content.startsWith('!!TODO!!')) {
+                            try {
+                                const todos = JSON.parse(tab.content.replace('!!TODO!!', ''));
+                                isEmpty = todos.length === 0;
+                            } catch (e) { isEmpty = true; }
+                        } else if (tab.content.startsWith('!!HTML!!')) {
+                            isEmpty = tab.content.replace('!!HTML!!', '').trim() === '';
+                        } else {
+                            isEmpty = tab.content.trim() === '';
+                        }
+
+                        if (isEmpty) {
+                            categoriesData.splice(catIndex, 1);
+                            syncNotes();
+                            activeCategoryId = categoriesData[0].id;
+                        }
+                    }
+                }
+            }
+
             viewState = 'CATEGORIES';
             activeTabId = null;
             showHelpView();
@@ -1901,13 +1929,13 @@
                 const colorCmdMatch = currentLine.toLowerCase().match(/^:(tab|cat)(red|green|blue|mauve|peach)$/);
                 if (colorCmdMatch) {
                     e.preventDefault();
-                    const targetType = colorCmdMatch[1]; // "tab" or "cat"
-                    const colorName = colorCmdMatch[2];  // "red", "green", etc.
+                    const targetType = colorCmdMatch[1]; 
+                    const colorName = colorCmdMatch[2]; 
                     const colorVar = `var(--${colorName})`;
 
                     if (targetType === 'tab') {
                         currentTab.color = colorVar;
-                        notesArea.style.color = colorVar; // Immediate update for editor
+                        notesArea.style.color = colorVar;
                     } else if (targetType === 'cat' && currentCat) {
                         currentCat.color = colorVar;
                     }
@@ -2100,14 +2128,12 @@
                 switch (e.code) {
                     case 'KeyF':
                         container.classList.toggle('fullscreen-mode');
-                        // Reset View Logic: Wenn Fullscreen verlassen wird, alle minimierten Widgets maximieren
                         if (!container.classList.contains('fullscreen-mode')) {
                             document.querySelectorAll('.box.minimized').forEach(box => {
                                 box.classList.remove('minimized');
                                 const btn = box.querySelector('.min-btn');
                                 if (btn) btn.textContent = '[ - ]';
                             });
-                            // Rail-Status am Container ebenfalls zurücksetzen
                             container.classList.remove('all-minimized-left', 'all-minimized-right');
                         }
                         handleScaling(); 
@@ -2182,7 +2208,6 @@
             const container = document.getElementById('dashboard-container');
             if (!container.classList.contains('fullscreen-mode')) return;
 
-            // Ignoriere Klicks auf interaktive Elemente
             if (event.target.closest('input, button, a, textarea, #edit-links-toggle')) return;
 
             const box = event.currentTarget;
@@ -2305,7 +2330,6 @@
                 }];
             } else {
                 const parsed = JSON.parse(savedNotes);
-                // Migration: Check if old flat format
                 if (Array.isArray(parsed) && parsed.length > 0 && !parsed[0].tabs) {
                     categoriesData = [{
                         id: Date.now(),
