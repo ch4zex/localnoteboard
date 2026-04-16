@@ -55,12 +55,13 @@
         #dashboard-container {
             display: grid;
             grid-template-columns: 500px 300px;
-            grid-template-rows: auto 150px 225px auto;
+            grid-template-rows: auto 60px 150px 225px auto;
             gap: var(--gap);
             width: 820px; /* 500 + 300 + gap */
             height: auto;
             transition: transform 0.3s ease;
             transform-origin: center;
+            position: relative;
         }
 
         .box {
@@ -75,6 +76,10 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             transition: border-left 0.3s ease, padding-left 0.3s ease;
         }
+        #dashboard-container:not(.fullscreen-mode) .command-box {
+            overflow: visible;
+        }
+
         .box { --hover-border-color: var(--accent); }
 
         .box:hover {
@@ -94,9 +99,8 @@
 
         /* Sidebar Wrapper Logic */
         #left-sidebar {
-            display: contents; /* Verhält sich im Standard-Modus so, als wäre er nicht da */
+            display: contents;
         }
-                /* Verhindert, dass zusätzliche Widgets den normalen Grid-Modus beeinflussen */
         #left-sidebar .scratchpad-box, 
         #right-sidebar .task-manager-box, 
         #right-sidebar .dump-box { 
@@ -123,7 +127,6 @@
             grid-column: 3;
             grid-row: 1 / span 5;
         }
-        /* Re-aktiviert Widgets im Fullscreen-Modus */
         .fullscreen-mode #left-sidebar .scratchpad-box, 
         .fullscreen-mode #right-sidebar .task-manager-box, 
         .fullscreen-mode #right-sidebar .dump-box { 
@@ -196,7 +199,7 @@
         .all-minimized-right #right-sidebar .box.minimized .header {
             writing-mode: vertical-rl;
             display: flex;
-            flex-direction: row; /* In vertikaler Schreibweise entspricht 'row' der vertikalen Achse */
+            flex-direction: row;
             justify-content: center;
             align-items: center;
             height: auto;
@@ -206,8 +209,6 @@
             gap: 15px;
             border: none !important;
         }
-
-        /* Text-Ausrichtung: Links von unten nach oben, Rechts von oben nach unten (beide zur Mitte blickend) */
         .all-minimized-left #left-sidebar .box.minimized .header { transform: rotate(180deg); }
         .all-minimized-right #right-sidebar .box.minimized .header { transform: rotate(0deg); }
 
@@ -228,10 +229,20 @@
             display: none; 
         }
 
-        .clock-box { grid-column: 1; grid-row: 2; }
-        .timer-box { grid-column: 1; grid-row: 3; }
-        .links-box { grid-column: 2; grid-row: 2 / span 2; }
+    .fullscreen-mode .command-box { display: none; }
 
+    /* Grid Positionen */
+    .command-box {
+        grid-column: 1 / span 2;
+        grid-row: 2;
+        padding: 10px;
+        justify-content: center;
+    }
+    .clock-box { grid-column: 1; grid-row: 3; }
+    .timer-box { grid-column: 1; grid-row: 4; }
+    .links-box { grid-column: 2; grid-row: 3 / span 2; }
+
+ 
         .fullscreen-mode .clock-box, 
         .fullscreen-mode .timer-box, 
         .fullscreen-mode .scratchpad-box,
@@ -245,7 +256,7 @@
 
         .notes-box { 
             grid-column: 1 / span 2; 
-            grid-row: 4; 
+            grid-row: 5; 
             resize: vertical;
             overflow: hidden;
             min-height: 225px;
@@ -257,13 +268,13 @@
         }
 
         .scratchpad-box {
-            display: none; /* Standardmäßig ausgeblendet */
+            display: none;
         }
 
         .fullscreen-mode .scratchpad-box {
             display: flex;
-            flex: 1; /* Nimmt im Sidebar-Modus den restlichen Platz ein */
-            background-color: #11111b; /* Etwas dunklerer Hintergrund (Crust) */
+            flex: 1;
+            background-color: #11111b;
             min-height: 0;
         }
         .fullscreen-mode .scratchpad-box.minimized { flex: 0 0 auto; }
@@ -330,12 +341,26 @@
             width: 100vw !important;
             height: 100vh !important;
             max-width: none !important;
-            grid-template-columns: minmax(150px, 500px) minmax(800px, 1fr) minmax(150px, 300px);
+            grid-template-columns: minmax(150px, 500px) minmax(0, 1fr) minmax(150px, 300px);
             grid-template-rows: 150px 225px 1fr 395px 110px; 
             padding: var(--gap);
             box-sizing: border-box;
             transform: none !important;
         }
+
+        .command-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--surface0);
+            color: var(--mauve);
+            font-family: inherit;
+            font-size: 20px;
+            text-align: left;
+            outline: none;
+            letter-spacing: 5px;
+        }
+
 
         .fullscreen-mode .notes-box { 
             grid-column: 2; 
@@ -371,6 +396,79 @@
         #notes-area.html-mode::placeholder {
             color: var(--surface0) !important;
             -webkit-text-fill-color: var(--surface0);
+        }
+
+        #search-results-container {
+            display: none;
+            background-color: var(--base);
+            border: 2px solid var(--surface0);
+            z-index: 100;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            box-sizing: border-box;
+            scrollbar-width: none;
+        }
+        #search-results-container::-webkit-scrollbar { display: none; }
+
+        /* Normal Mode Search Results (Overlay) */
+        #dashboard-container:not(.fullscreen-mode) #search-results-container {
+            position: absolute;
+            top: 80px;
+            left: 0;
+            width: 100%;
+            height: 415px; 
+        }
+
+        /* Fullscreen Mode Search */
+        .fullscreen-mode .command-box {
+            grid-column: auto;
+            grid-row: auto;
+            width: auto;
+            border: none;
+            box-shadow: none;
+            background: transparent;
+            padding: 10px 0;
+            margin: 0 8px;
+            position: static;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        .fullscreen-mode #search-results-container {
+            position: static;
+            height: 0;
+            width: auto;
+            border: none;
+            box-shadow: none;
+            background: transparent;
+            transition: height 0.3s ease-in-out;
+        }
+        .fullscreen-mode #search-results-container .search-result-item {
+            background-color: var(--mantle);
+        }
+
+        .search-result-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--surface0);
+            font-size: 13px;
+            line-height: 1.5;
+            transition: background-color 0.2s;
+        }
+        .search-result-item:hover {
+            background-color: var(--surface0);
+        }
+        .search-result-item .cat-name { color: var(--mauve); font-weight: bold; }
+        .search-result-item .tab-name { color: var(--blue); }
+        .search-result-item .snippet { color: var(--subtext0); display: block; margin-top: 4px; }
+        .search-result-item .snippet strong { color: var(--green); background-color: #3a3e52; font-weight: normal; }
+        
+        .search-no-results {
+            padding: 20px;
+            text-align: center;
+            color: var(--subtext0);
+            font-style: italic;
         }
 
         .line-numbers {
@@ -418,7 +516,7 @@
         .note-tab {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 4px; 
             cursor: pointer;
             padding-bottom: 1px;
             border-bottom: 1px solid transparent;
@@ -437,15 +535,16 @@
             font-size: 10px;
             width: 70px;
             outline: none;
-            transition: color 0.3s ease;
+            transition: color 0.3s ease, background-color 0.2s ease;
             text-transform: uppercase;
+            text-align: center;
+            cursor: inherit;
         }
 
-        .note-tab.active .tab-name-input {
-            color: var(--green);
+        .tab-name-input:not([readonly]) {
+            cursor: text;
+            background-color: var(--surface0);
         }
-
-        .tab-close:hover { opacity: 1; }
 
         .add-tab-btn {
             cursor: pointer;
@@ -623,8 +722,17 @@
             display: block;
         }
 
+        #notes-area.todo-cmd-input {
+            flex: none;
+            height: 35px !important;
+            min-height: 35px !important;
+            border-bottom: 1px dashed var(--surface0) !important;
+            margin-bottom: 10px !important;
+            overflow: hidden;
+        }
+
         #notes-area::-webkit-scrollbar {
-            display: none; /* Chrome/Safari */
+            display: none;
         }
 
         .status-text {
@@ -666,7 +774,7 @@
             display: flex;
             gap: 10px;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s ease, right 0.3s ease;
             z-index: 10;
         }
 
@@ -689,6 +797,131 @@
         .timer-input:focus {
             border-bottom-color: var(--green);
             color: var(--text);
+        }
+
+        /* Timer Side Panel Logic */
+        .timer-content-wrapper {
+            display: flex;
+            flex: 1;
+            width: 100%;
+            overflow: hidden;
+        }
+        .timer-main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .timer-side-panel {
+            width: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            gap: 10px;
+            border-left: 1px dashed transparent;
+            margin-right: -15px;
+            margin-left: 0;
+        }
+        .timer-box.show-side .timer-side-panel {
+        width: 80px;
+            opacity: 1;
+            padding-left: 10px;
+            border-left-color: var(--surface0);
+            margin-left: 15px;
+        }
+        .focus-core-container {
+            display: flex; 
+            flex-direction: column-reverse;
+            gap: 1px;
+            width: 16px;
+            height: 110px;
+            padding: 2px;
+            background-color: var(--mantle);
+            border: 1px solid var(--surface0);
+            border-radius: 3px;
+            box-sizing: border-box;
+        }
+        .focus-core-segment {
+            flex: 1; 
+            background-color: var(--surface0);
+            transition: all 0.5s ease;
+        }
+        .focus-core-segment.charged {
+            background-color: var(--blue);
+            box-shadow: 0 0 8px var(--blue);
+        }
+        .focus-core-label {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            letter-spacing: 2px;
+            font-size: 11px;
+            font-weight: bold;
+            color: var(--subtext0);
+        }
+        .focus-core-settings {
+            position: absolute;
+            bottom: 1px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            padding-top: 5px;
+        }
+        .timer-side-panel:hover .focus-core-settings {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #fcore-interval-input {
+            width: 3ch;
+            padding: 1px 0;
+        }
+        .fcore-util-btn {
+            background: transparent;
+            border: none;
+            color: var(--subtext0);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0 2px;
+            line-height: 1;
+            transition: color 0.2s ease;
+        }
+        .fcore-util-btn:hover {
+            color: var(--red);
+        }
+        .timer-slide-btn {
+            position: absolute;
+            right: 10px;
+            top: 38px;
+            cursor: pointer; 
+            opacity: 0;
+            color: var(--mauve);
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.3s ease, color 0.2s ease, opacity 0.3s ease;
+            user-select: none;
+            z-index: 10;
+            padding: 5px;
+            line-height: 1;
+        }
+        .timer-box:hover .timer-slide-btn { opacity: 1; }
+        .timer-box.show-side .timer-slide-btn {
+            transform: rotate(180deg);
+        }
+        .box.minimized .timer-slide-btn {
+            display: none !important;
+        }
+        .timer-box.show-side .timer-settings {
+        right: 106px;
         }
 
         #todo-list-container {
@@ -832,11 +1065,11 @@
             gap: 10px;
             flex: 1;
             margin: 8px 0;
-            align-items: stretch; /* Buttons füllen die vertikale Höhe */
+            align-items: stretch;
         }
 
         .dump-box .controls button {
-            flex: 1; /* Buttons füllen die horizontale Breite gleichmäßig */
+            flex: 1;
             font-size: 11px;
             font-weight: bold;
         }
@@ -846,6 +1079,11 @@
 
     <div id="dashboard-wrapper">
         <div id="dashboard-container">
+
+            <div class="box command-box">
+                <input type="text" id="command-input" class="command-input" placeholder="SEARCH NOTES..." autocomplete="off">
+            </div>
+            <div id="search-results-container"></div>
 
             <div id="left-sidebar">
             <div class="box clock-box" onmouseenter="triggerHover(this)" onmouseleave="removeHover(this)" onclick="handleBoxClick(event, 'clock')">
@@ -875,16 +1113,38 @@
                         <span class="min-btn" onclick="event.stopPropagation(); toggleMinimize(this, 'timer')">[ - ]</span>
                     </div>
                 </div>
-                <div class="timer-display" id="timer">30:00</div>
-                <div class="progress-container" id="progress-container">
-                    <div id="progress-bar"></div>
+                <div class="timer-slide-btn" onclick="event.stopPropagation(); this.closest('.timer-box').classList.toggle('show-side')">&gt;</div>
+                <div class="timer-content-wrapper">
+                    <div class="timer-main-content">
+                        <div class="timer-display" id="timer">30:00</div>
+                        <div class="progress-container" id="progress-container">
+                            <div id="progress-bar"></div>
+                        </div>
+                        <div class="controls">
+                            <button id="startBtn">Start</button>
+                            <button id="pauseBtn">Pause</button>
+                            <button id="resetBtn">Reset</button>
+                        </div>
+                        <div class="status-text" id="timer-status">> STATUS: READY_</div>
+                    </div>
+                    <div class="timer-side-panel" id="focus-core-panel">
+                        <div class="focus-core-container">
+                            <div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div>
+                            <div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div>
+                            <div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div>
+                            <div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div>
+                            <div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div>
+                            <div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div>
+                            <div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div>
+                            <div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div><div class="focus-core-segment"></div>
+                        </div>
+                        <div class="focus-core-label">CORE</div>
+                        <div class="focus-core-settings">
+                            <input type="text" id="fcore-interval-input" class="timer-input" maxlength="3" spellcheck="false">
+                            <button id="fcore-reset-btn" class="fcore-util-btn">⟲</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="controls">
-                    <button id="startBtn">Start</button>
-                    <button id="pauseBtn">Pause</button>
-                    <button id="resetBtn">Reset</button>
-                </div>
-                <div class="status-text" id="timer-status">> STATUS: READY_</div>
                 <div class="timer-settings">
                     <input type="text" id="focus-time-input" class="timer-input" placeholder="30" spellcheck="false" maxlength="2">
                     <input type="text" id="break-time-input" class="timer-input" placeholder="05" spellcheck="false" maxlength="2">
@@ -960,9 +1220,8 @@
             </div>
             </div>
 
-            <div class="box notes-box" onmouseenter="triggerHover(this)" onmouseleave="removeHover(this)">
+            <div class="box notes-box">
                 <div class="header">
-                    <span class="decipher-text">SYSTEM: QUICK_NOTES</span>
                     <span id="category-display" onclick="backToCategories()" style="color: var(--mauve); font-weight: bold; margin-left: 10px; display: none; cursor: pointer;"></span>
                     <button id="scroll-left-tabs" class="tab-nav-btn">&lt;</button>
                     <div id="notes-tabs-container"></div>
@@ -986,6 +1245,9 @@
     <script>
         /** --- GLOBAL UTILITIES --- **/
         const chars = "!<>-_\\/[]{}@#$%^&*()_+{}:\"?><,.";
+        const commandInput = document.getElementById('command-input');
+        const searchResultsContainer = document.getElementById('search-results-container');
+        const commandBox = document.querySelector('.command-box');
 
         function debounce(func, timeout = 500) {
             let timer;
@@ -1050,6 +1312,120 @@
             }
         }
 
+        function showSearchResults() {
+            const isFullscreen = document.getElementById('dashboard-container').classList.contains('fullscreen-mode');
+            searchResultsContainer.style.display = 'block';
+            if (isFullscreen) {
+                searchResultsContainer.style.height = '300px';
+            }
+        }
+
+        function hideSearchResults() {
+            const isFullscreen = document.getElementById('dashboard-container').classList.contains('fullscreen-mode');
+            if (isFullscreen) {
+                searchResultsContainer.style.height = '0px';
+            } else {
+                searchResultsContainer.style.display = 'none';
+            }
+        }
+
+        /** --- LIVE SEARCH --- **/
+        function handleSearch() {
+            const term = commandInput.value.trim().toLowerCase();
+
+            if (!term) {
+                hideSearchResults();
+                return;
+            }
+
+            let searchResults = [];
+            const termRegex = new RegExp(term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+
+            for (const cat of categoriesData) {
+                for (const tab of cat.tabs) {
+                    let score = 0;
+                    let bestSnippet = '';
+
+                    // Search content
+                    let searchableContent = tab.content;
+                    if (tab.content.startsWith('!!TODO!!')) {
+                        try {
+                            const todos = JSON.parse(tab.content.replace('!!TODO!!', ''));
+                            searchableContent = todos.map(t => t.text).join('\n');
+                        } catch (e) { searchableContent = ''; }
+                    } else if (tab.content.startsWith('!!HTML!!')) {
+                        searchableContent = tab.content.substring(8);
+                    }
+
+                    const contentLower = searchableContent.toLowerCase();
+                    const contentMatchIndex = contentLower.indexOf(term);
+                    if (contentMatchIndex > -1) {
+                        score += (contentLower.match(new RegExp(term, 'g')) || []).length;
+                        
+                        const radius = 40;
+                        const start = Math.max(0, contentMatchIndex - radius);
+                        const end = Math.min(searchableContent.length, contentMatchIndex + term.length + radius);
+                        let snippet = searchableContent.substring(start, end);
+                        if (start > 0) snippet = '...' + snippet;
+                        if (end < searchableContent.length) snippet += '...';
+                        bestSnippet = escapeHTML(snippet).replace(termRegex, '<strong>$&</strong>');
+                    }
+
+                    // Search tab name
+                    if (tab.name.toLowerCase().includes(term)) {
+                        score += 5;
+                        if (!bestSnippet) {
+                            bestSnippet = `Match in tab title: ${escapeHTML(tab.name).replace(termRegex, '<strong>$&</strong>')}`;
+                        }
+                    }
+
+                    // Search category name
+                    if (cat.name.toLowerCase().includes(term)) {
+                        score += 10;
+                        if (!bestSnippet) {
+                            bestSnippet = `Match in category: ${escapeHTML(cat.name).replace(termRegex, '<strong>$&</strong>')}`;
+                        }
+                    }
+
+                    if (score > 0) {
+                        searchResults.push({
+                            catName: cat.name,
+                            tabId: tab.id,
+                            tabName: tab.name,
+                            score: score,
+                            snippet: bestSnippet || escapeHTML(searchableContent.substring(0, 80)) + '...'
+                        });
+                    }
+                }
+            }
+
+            searchResults.sort((a, b) => b.score - a.score);
+
+            searchResultsContainer.innerHTML = '';
+            if (searchResults.length > 0) {
+                searchResults.forEach(res => {
+                    const item = document.createElement('div');
+                    item.className = 'search-result-item';
+                    
+                    item.innerHTML = `
+                        <span class="cat-name">${escapeHTML(res.catName)}</span> - 
+                        <span class="tab-name">${escapeHTML(res.tabName)}</span>
+                        <span class="snippet">${res.snippet}</span>
+                    `;
+
+                    item.onclick = () => {
+                        selectTab(res.tabId);
+                        commandInput.value = '';
+                        searchResultsContainer.style.display = 'none';
+                    };
+                    searchResultsContainer.appendChild(item);
+                });
+            } else {
+                searchResultsContainer.innerHTML = '<div class="search-no-results">No matches found.</div>';
+            }
+            showSearchResults();
+        }
+
         /** --- UI & EFFECTS --- **/
 
         const catppuccinAccentColors = [
@@ -1061,20 +1437,31 @@
 
         function decipherEffect(element, originalText) {
             if (element.dataset.decipherIntervalId) clearInterval(parseInt(element.dataset.decipherIntervalId));
-            
+            const isInput = element.tagName === 'INPUT';
+
             let iteration = 0;
             const intervalId = setInterval(() => {
-                element.innerText = originalText
+                const newText = originalText
                     .split("")
                     .map((letter, index) => {
                         if(index < iteration) return originalText[index];
                         return chars[Math.floor(Math.random() * chars.length)];
                     })
                     .join("");
+
+                if (isInput) {
+                    element.value = newText;
+                } else {
+                    element.innerText = newText;
+                }
                 
                 if(iteration >= originalText.length) {
                     clearInterval(intervalId);
-                    element.innerText = originalText;
+                    if (isInput) {
+                        element.value = originalText;
+                    } else {
+                        element.innerText = originalText;
+                    }
                 }
                 iteration += 1/3;
             }, 30);
@@ -1118,7 +1505,7 @@
 
             const scaleX = wrapper.clientWidth / container.offsetWidth;
             const scaleY = wrapper.clientHeight / container.offsetHeight;
-            const scale = Math.min(scaleX, scaleY, 1); // Only scale down, never up
+            const scale = Math.min(scaleX, scaleY, 1);
             container.style.transform = `scale(${scale})`;
         }
 
@@ -1283,6 +1670,27 @@
         let currentMode = 'FOCUS';
         let timerId = null;
         let isRunning = false;
+        let chargeIntervalSeconds = 900;
+        let focusData = { date: new Date().toISOString().slice(0, 10), totalSeconds: 0 };
+
+        function updateFocusCore() {
+            const corePanel = document.getElementById('focus-core-panel');
+            if (!corePanel) return;
+
+            const segments = corePanel.querySelectorAll('.focus-core-segment');
+            const segmentsToCharge = Math.floor((focusData.totalSeconds || 0) / chargeIntervalSeconds);
+
+            segments.forEach((segment, index) => {
+                if (index < segmentsToCharge) {
+                    segment.classList.add('charged');
+                } else {
+                    segment.classList.remove('charged');
+                }
+            });
+        }
+
+        const fCoreIntervalInput = document.getElementById('fcore-interval-input');
+        const fCoreResetBtn = document.getElementById('fcore-reset-btn');
 
         const timerDisplay = document.getElementById('timer');
         const progressBar = document.getElementById('progress-bar');
@@ -1305,7 +1713,7 @@
             gainNode.connect(audioCtx.destination);
 
             oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(440, audioCtx.currentTime); // A4 Note
+            oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
             gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1);
 
@@ -1336,6 +1744,7 @@
         function handleSessionComplete() {
             clearInterval(timerId);
             playBeep();
+            
             isRunning = false;
             currentMode = currentMode === 'FOCUS' ? 'BREAK' : 'FOCUS';
             timeLeft = totalTime = (currentMode === 'FOCUS' ? focusDurationSeconds : breakDurationSeconds);
@@ -1361,9 +1770,36 @@
             timerStatusEl.textContent = "> STATUS: RUNNING...";
             timerId = setInterval(() => {
                 timeLeft--;
+                if (currentMode === 'FOCUS') {
+                    focusData.totalSeconds = (focusData.totalSeconds || 0) + 1;
+                    localStorage.setItem('dash_focus_data', JSON.stringify(focusData));
+                    updateFocusCore();
+                }
                 updateTimerDisplay();
             }, 1000);
         }
+
+        fCoreIntervalInput.addEventListener('input', () => {
+            const value = parseInt(fCoreIntervalInput.value);
+            if (!isNaN(value) && value > 0) {
+                chargeIntervalSeconds = value * 60;
+                fCoreIntervalInput.style.color = 'var(--text)';
+                
+                const config = JSON.parse(localStorage.getItem('dash_config')) || {};
+                config.dash_fcore_interval = chargeIntervalSeconds;
+                localStorage.setItem('dash_config', JSON.stringify(config));
+                
+                updateFocusCore();
+            } else if (fCoreIntervalInput.value.trim() !== '') {
+                fCoreIntervalInput.style.color = 'var(--red)';
+            }
+        });
+
+        fCoreResetBtn.addEventListener('click', () => {
+            focusData.totalSeconds = 0;
+            localStorage.setItem('dash_focus_data', JSON.stringify(focusData));
+            updateFocusCore();
+        });
 
         startBtn.addEventListener('click', startTimer);
 
@@ -1412,6 +1848,7 @@
 
         /** --- QUICK NOTES LOGIC --- **/
         function autoResizeNotes() {
+            if (notesArea.classList.contains('todo-cmd-input')) return;
             notesArea.style.height = 'auto';
             notesArea.style.height = notesArea.scrollHeight + 'px';
         }
@@ -1468,6 +1905,14 @@
         const scrollRightBtn = document.getElementById('scroll-right-tabs');
         const notesTabsContainer = document.getElementById('notes-tabs-container');
         const addNoteTabBtn = document.getElementById('add-note-tab');
+
+        const notesAreaObserver = new ResizeObserver(() => {
+            if (notesArea.offsetParent !== null) {
+                updateLineNumbers();
+            }
+        });
+        notesAreaObserver.observe(notesArea);
+
 
         let categoriesData = [];
         let viewState = 'CATEGORIES';
@@ -1590,20 +2035,57 @@
             input.className = 'tab-name-input';
             input.value = data.name;
             input.spellcheck = false;
+            input.readOnly = true;
+            input.style.fontWeight = isCategory ? 'bold' : 'normal';
             
             input.addEventListener('input', (e) => {
                 data.name = e.target.value.toUpperCase();
                 syncNotes();
                 renderTaskManager();
             });
-            if (isActive) input.style.color = data.color;
-            input.addEventListener('click', (e) => {
-                isCategory ? selectCategory(data.id) : selectTab(data.id);
-                e.stopPropagation();
+
+            input.addEventListener('blur', () => {
+                input.readOnly = true;
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    input.blur();
+                }
+            });
+
+            input.style.color = data.color;
+
+            el.addEventListener('mouseenter', () => {
+                if (input.dataset.decipherIntervalId || input.readOnly === false) return;
+                decipherEffect(input, input.value);
+            });
+
+            el.addEventListener('mouseleave', () => {
+                if (input.dataset.decipherIntervalId) {
+                    clearInterval(parseInt(input.dataset.decipherIntervalId));
+                    delete input.dataset.decipherIntervalId;
+                    input.value = data.name;
+                }
             });
 
             el.appendChild(input);
-            el.onclick = () => isCategory ? selectCategory(data.id) : selectTab(data.id);
+
+            el.onclick = () => {
+                if (isCategory) {
+                    selectCategory(data.id);
+                } else {
+                    const isAlreadyActive = data.id === activeTabId;
+                    if (isAlreadyActive) {
+                        input.readOnly = false;
+                        input.focus();
+                        input.select();
+                    } else {
+                        selectTab(data.id);
+                    }
+                }
+            };
+            
             notesTabsContainer.appendChild(el);
         }
 
@@ -1630,10 +2112,23 @@
                 const input = document.createElement('input');
                 input.className = `todo-text ${todo.done ? 'completed' : ''}`;
                 input.value = todo.text;
+                input.placeholder = '> ENTER_TASK_';
                 input.onchange = (e) => {
                     todos[index].text = e.target.value;
                     updateTodoData(tab, todos);
                 };
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        todos[index].text = e.target.value;
+                        todos.splice(index + 1, 0, { text: '', done: false });
+                        updateTodoData(tab, todos);
+                        setTimeout(() => {
+                            const inputs = todoListContainer.querySelectorAll('.todo-text');
+                            if (inputs[index + 1]) inputs[index + 1].focus();
+                        }, 10);
+                    }
+                });
 
                 const del = document.createElement('div');
                 del.className = 'todo-delete';
@@ -1727,8 +2222,9 @@
                 </div>
                 <div class="help-section">
                     <div class="help-title">Note Navigation & Selection</div>
-                    <div class="help-item"><span class="help-key">Space + [1-9]</span><span class="help-desc">Switch directly to specific note tab.</span></div>
+                    <div class="help-item"><span class="help-key">Space + [1-9]</span><span class="help-desc">Switch directly to specific categorie or note tab.</span></div>
                     <div class="help-item"><span class="help-key">Space + ←/→</span><span class="help-desc">Cycle through your tabs.</span></div>
+                    <div class="help-item"><span class="help-key">Space + ESCAPE</span><span class="help-desc">Switch back from note tabs to categorie tabs</span></div>
                     <div class="help-item"><span class="help-key">Tab</span><span class="help-desc">Toggle focus between Dashboard and Editor.</span></div>
                 </div>
                 <div class="help-section">
@@ -1738,11 +2234,16 @@
                 </div>
                 <div class="help-section">
                     <div class="help-title">Editor Magic (First Line)</div>
-                    <div class="help-item"><span class="help-key">:title</span><span class="help-desc">Set title for current tab ":title Test" (works in any line)</span></div>
-                    <div class="help-item"><span class="help-key">:ts</span><span class="help-desc">Insert current timestamp based on selected timezone.</span></div>
+                    <div class="help-item"><span class="help-key">:cat</span><span class="help-desc">Rename category ":cat Work"</span></div>
+                    <div class="help-item"><span class="help-key">:title</span><span class="help-desc">Set title for current note tab ":title Test" (works in any line)</span></div>
+                    <div class="help-item"><span class="help-key">:ts</span><span class="help-desc">Insert timestamp.</span></div>
                     <div class="help-item"><span class="help-key">:todo</span><span class="help-desc">Transform current tab into an interactive Todo List.</span></div>
-                    <div class="help-item"><span class="help-key">:html</span><span class="help-desc">Enable Syntax Highlighting for HTML, CSS, and JS.</span></div>
                     <div class="help-item"><span class="help-key">:help</span><span class="help-desc">Show this documentation again.</span></div>
+                </div>
+                <div class="help-section">
+                    <div class="help-title">Color Commands</div>
+                    <div class="help-item"><span class="help-key">:tab[color]</span><span class="help-desc">e.g. :tabred, :tabblue, :tabmauve</span></div>
+                    <div class="help-item"><span class="help-key">:cat[color]</span><span class="help-desc">e.g. :catgreen, :catpeach</span></div>
                 </div>
                 <div class="help-section">
                     <div class="help-title">Fullscreen Controls</div>
@@ -1801,13 +2302,18 @@
             const isHTML = targetTab && targetTab.content.startsWith('!!HTML!!');
 
             if (isTodo) {
-                notesArea.style.display = 'none';
+                notesArea.style.display = 'block';
+                notesArea.classList.add('todo-cmd-input');
+                notesArea.value = '';
+                notesArea.placeholder = '> ENTER_COMMANDS_ (:title, :cat, :help)';
                 lineNumbersDiv.style.display = 'none';
                 todoListContainer.style.display = 'flex';
                 renderTodoView(targetTab);
                 highlightLayer.style.display = 'none';
             } else if (targetTab) {
                 notesArea.style.display = 'block';
+                notesArea.classList.remove('todo-cmd-input');
+                notesArea.placeholder = '> ENTER_DATA_';
                 lineNumbersDiv.style.display = 'block';
                 todoListContainer.style.display = 'none';
                 
@@ -1830,8 +2336,15 @@
             updateScrollButtonsState();
             updateLineNumbers();
             autoResizeNotes();
-            if (shouldFocus && !isTodo) {
-                setTimeout(() => notesArea.focus(), 0);
+            if (shouldFocus) {
+                if (isTodo) {
+                    setTimeout(() => {
+                        const firstTodo = todoListContainer.querySelector('.todo-text');
+                        if (firstTodo) firstTodo.focus();
+                    }, 0);
+                } else {
+                    setTimeout(() => notesArea.focus(), 0);
+                }
             }
         }
         
@@ -1889,7 +2402,6 @@
                 const { tab: currentTab, cat: currentCat } = findTab(activeTabId);
                 if (!currentTab) return;
 
-                // Check for :title [NAME]
                 if (currentLine.toLowerCase().startsWith(':title ')) {
                     const newTitle = currentLine.substring(7).trim().toUpperCase();
                     if (newTitle) {
@@ -1898,7 +2410,9 @@
                         const before = text.substring(0, startOfLine);
                         const after = text.substring(pos);
                         notesArea.value = before + after;
-                        currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
+                        if (!currentTab.content.startsWith('!!TODO!!')) {
+                            currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
+                        }
                         notesArea.setSelectionRange(startOfLine, startOfLine);
                         renderTabs();
                         syncNotes();
@@ -1908,7 +2422,6 @@
                     }
                 }
 
-                // Check for :cat [NAME] (Rename Category)
                 if (currentLine.toLowerCase().startsWith(':cat ')) {
                     const newCatName = currentLine.substring(5).trim().toUpperCase();
                     if (newCatName && currentCat) {
@@ -1917,7 +2430,9 @@
                         const before = text.substring(0, startOfLine);
                         const after = text.substring(pos);
                         notesArea.value = before + after;
-                        currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
+                        if (!currentTab.content.startsWith('!!TODO!!')) {
+                            currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
+                        }
                         notesArea.setSelectionRange(startOfLine, startOfLine);
                         renderTabs();
                         syncNotes();
@@ -1925,7 +2440,6 @@
                     }
                 }
 
-                // Color Commands (tabred, catred, etc.)
                 const colorCmdMatch = currentLine.toLowerCase().match(/^:(tab|cat)(red|green|blue|mauve|peach)$/);
                 if (colorCmdMatch) {
                     e.preventDefault();
@@ -1943,7 +2457,9 @@
                     const before = text.substring(0, startOfLine);
                     const after = text.substring(pos);
                     notesArea.value = before + after;
-                    currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
+                    if (!currentTab.content.startsWith('!!TODO!!')) {
+                        currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
+                    }
                     notesArea.setSelectionRange(startOfLine, startOfLine);
                     renderTabs();
                     syncNotes();
@@ -1952,7 +2468,6 @@
                     return;
                 }
 
-                // Check for :ts (Timestamp)
                 if (currentLine.toLowerCase() === ':ts') {
                     e.preventDefault();
                     const now = new Date();
@@ -1972,7 +2487,9 @@
                     const before = text.substring(0, startOfLine);
                     const after = text.substring(pos);
                     notesArea.value = before + ts + after;
-                    currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
+                    if (!currentTab.content.startsWith('!!TODO!!')) {
+                        currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
+                    }
                     const newPos = startOfLine + ts.length;
                     notesArea.setSelectionRange(newPos, newPos);
                     syncNotes();
@@ -1981,17 +2498,18 @@
                     return;
                 }
 
-                // Check for other toggle commands
                 if (currentLine === ':todo' || currentLine === ':help' || currentLine === ':html') {
                     e.preventDefault();
                     const before = text.substring(0, startOfLine);
                     const after = text.substring(pos);
                     notesArea.value = before + after;
-                    currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
+                    if (!currentTab.content.startsWith('!!TODO!!')) {
+                        currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
+                    }
                     notesArea.setSelectionRange(startOfLine, startOfLine);
 
                     if (currentLine === ':todo') {
-                        currentTab.content = '!!TODO!!' + JSON.stringify([{ text: 'First task...', done: false }]);
+                        currentTab.content = '!!TODO!!' + JSON.stringify([{ text: '', done: false }]);
                         selectTab(currentTab.id);
                     } else if (currentLine === ':help') {
                         showHelpView();
@@ -2023,7 +2541,9 @@
         notesArea.addEventListener('input', () => {
             const { tab: currentTab } = findTab(activeTabId);
             if (currentTab) {
-                currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
+                if (!currentTab.content.startsWith('!!TODO!!')) {
+                    currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
+                }
                 syncNotes();
             }
             updateLineNumbers();
@@ -2068,6 +2588,9 @@
             setTimeout(updateScrollButtonsState, 300);
         });
 
+        commandInput.addEventListener('input', handleSearch);
+        commandInput.addEventListener('focus', handleSearch);
+
         focusTimeInput.addEventListener('input', handleTimeInputChange);
         breakTimeInput.addEventListener('input', handleTimeInputChange);
 
@@ -2089,7 +2612,12 @@
                 }
             }
 
-                        
+            if (e.code === 'Escape') {
+                if (document.activeElement === commandInput) {
+                    hideSearchResults();
+                    commandInput.blur();
+                }
+            }
             if (e.code === 'Escape' && isSpacePressed) {
                 e.preventDefault();
                 backToCategories();
@@ -2101,8 +2629,11 @@
                 if (isTyping) {
                     e.target.blur();
                 } else {
-                    const firstTodo = todoListContainer.querySelector('.todo-text');
-                    (todoListContainer.style.display === 'flex' && firstTodo) ? firstTodo.focus() : notesArea.focus();
+                    if (document.activeElement === commandInput) {
+                        notesArea.focus();
+                    } else {
+                        commandInput.focus();
+                    }
                 }
             }
 
@@ -2127,15 +2658,27 @@
 
                 switch (e.code) {
                     case 'KeyF':
+                        const notesBox = document.querySelector('.notes-box');
                         container.classList.toggle('fullscreen-mode');
+
                         if (!container.classList.contains('fullscreen-mode')) {
+                            container.insertBefore(commandBox, document.getElementById('left-sidebar'));
+                            container.insertBefore(searchResultsContainer, commandBox.nextSibling);
+                            
+                            searchResultsContainer.style.height = '';
+                            hideSearchResults();
+
                             document.querySelectorAll('.box.minimized').forEach(box => {
                                 box.classList.remove('minimized');
                                 const btn = box.querySelector('.min-btn');
                                 if (btn) btn.textContent = '[ - ]';
                             });
                             container.classList.remove('all-minimized-left', 'all-minimized-right');
+                        } else {
+                            notesBox.prepend(commandBox);
+                            commandBox.appendChild(searchResultsContainer);
                         }
+
                         handleScaling(); 
                         updateLineNumbers();
                         break;
@@ -2146,10 +2689,10 @@
                         switchTabRelative(1, false);
                         break;
                     case 'KeyQ':
-                        const notesBox = document.querySelector('.notes-box');
-                        if (notesBox) {
-                            const isExpanded = notesBox.style.height === '600px';
-                            notesBox.style.height = isExpanded ? '225px' : '600px';
+                        const notesBoxQ = document.querySelector('.notes-box');
+                        if (notesBoxQ) {
+                            const isExpanded = notesBoxQ.style.height === '600px';
+                            notesBoxQ.style.height = isExpanded ? '225px' : '600px';
                             if (typeof updateLineNumbers === 'function') updateLineNumbers();
                         }
                         break;
@@ -2188,6 +2731,12 @@
         window.addEventListener('keyup', (e) => {
             if (e.code === 'Space') {
                 isSpacePressed = false;
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!commandBox.contains(e.target) && !searchResultsContainer.contains(e.target)) {
+                hideSearchResults();
             }
         });
 
@@ -2244,6 +2793,7 @@
                 dash_links: localStorage.getItem('dash_links'),
                 dash_notes_tabs: localStorage.getItem('dash_notes_tabs'),
                 dash_scratchpad: localStorage.getItem('dash_scratchpad'),
+                dash_focus_data: localStorage.getItem('dash_focus_data'),
                 export_date: new Date().toISOString()
             };
             
@@ -2272,6 +2822,7 @@
                     if (data.dash_links) localStorage.setItem('dash_links', data.dash_links);
                     if (data.dash_notes_tabs) localStorage.setItem('dash_notes_tabs', data.dash_notes_tabs);
                     if (data.dash_scratchpad) localStorage.setItem('dash_scratchpad', data.dash_scratchpad);
+                    if (data.dash_focus_data) localStorage.setItem('dash_focus_data', data.dash_focus_data);
                     location.reload();
                 } catch (err) {
                     alert("Fehler beim Laden: " + err.message);
@@ -2286,6 +2837,16 @@
             const savedLinks = localStorage.getItem('dash_links');
             const savedNotes = localStorage.getItem('dash_notes_tabs');
 
+            const savedFocusData = JSON.parse(localStorage.getItem('dash_focus_data'));
+            const today = new Date().toISOString().slice(0, 10);
+
+            if (savedFocusData && savedFocusData.date === today) {
+                focusData = savedFocusData;
+            } else {
+                focusData = { date: today, totalSeconds: 0 };
+                localStorage.setItem('dash_focus_data', JSON.stringify(focusData));
+            }
+
             scratchpadArea.value = localStorage.getItem('dash_scratchpad') || '';
 
             if (config.dash_timezone) {
@@ -2295,6 +2856,9 @@
             }
             if (config.dash_focus_time) focusDurationSeconds = parseInt(config.dash_focus_time) * 60;
             if (config.dash_break_time) breakDurationSeconds = parseInt(config.dash_break_time) * 60;
+            
+        chargeIntervalSeconds = parseInt(config.dash_fcore_interval) || 900;
+            fCoreIntervalInput.value = chargeIntervalSeconds / 60;
             
             focusTimeInput.value = focusDurationSeconds / 60;
             breakTimeInput.value = breakDurationSeconds / 60;
@@ -2346,6 +2910,7 @@
                 viewState = 'CATEGORIES';
                 showHelpView();
                 renderTabs();
+                updateFocusCore();
             }
         }
 
