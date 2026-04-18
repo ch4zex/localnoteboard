@@ -5,7 +5,7 @@ Hello everyone! Today I'm sharing my personal note dashboard with you. I created
       <img src="assets/Fullscreen2.png" width="600" alt="Fullscreen2" />
    </div>
 
-<a href="https://ch4ze.ct.ws/">DEMO</a> may include functions that are not yet included in the release version.
+<a href="https://ch4ze.ct.ws/">DEMO</a>
 
 ## Features
 
@@ -14,6 +14,7 @@ This dashboard is designed to be a highly customizable and efficient personal wo
 *   **Sleek Catppuccin Mocha Theme:** A visually pleasing and comfortable color scheme for extended use.
 *   **Responsive & Scalable Layout:** The dashboard dynamically adjusts to your window size, and a fullscreen mode is available for focused work.
     *   **Screenshot:** Main dashboard view, showing all widgets.
+    *   **Tablet & Mobile Overlay:** Includes a floating quick-action menu for touch devices to easily toggle fullscreen, note sizes, and minimize widgets without a keyboard.
 *   **Dynamic Decipher Effects:** Interactive text effects on headers for a retro-futuristic feel.
 *   **Customizable Clock:**
     *   Displays current time with seconds.
@@ -25,11 +26,15 @@ This dashboard is designed to be a highly customizable and efficient personal wo
 *   **Scratchpad Widget:**
     *   A dedicated sidebar area for temporary text storage and quick drafting.
     *   Perfect for transient data that doesn't need a persistent note tab.
+*   **Global Live Search System:**
+    *   Fast search bar (`SEARCH NOTES...`) that instantly scans all categories, tabs, and note contents.
+    *   Provides highlighted snippets of matched text and one-click navigation directly to the result.
 *   **Integrated Pomodoro Timer:**
     *   Configurable focus and break durations.
     *   Start, pause, and reset functionalities.
     *   Visual progress bar with seek capability.
     *   Audible beep on session completion.
+    *   **Focus Core Tracking:** An expandable side-panel to visually track deep-work intervals and your overall focus progress for the day.
     *   **Screenshot:** Pomodoro timer in focus mode, progress bar partially filled.
 *   **System Navigation & Layout:**
     *   **Task Manager:** A central sidebar widget providing an overview of all categories and tabs for rapid navigation.
@@ -49,6 +54,7 @@ This dashboard is designed to be a highly customizable and efficient personal wo
     *   `:ts` - Inserts the current localized timestamp based on your configured timezone.
     *   `:tab[color]` / `:cat[color]` - Changes the accent color for the tab or category (supported: `red`, `green`, `blue`, `mauve`, `peach`).
     *   `:todo` - Transforms the current tab into an interactive Todo List.
+        *   **Task Reminders:** Set precise date and time reminders for individual tasks that trigger browser notifications.
         *   **Screenshot:** Notes tab converted to a todo list with a few items.
     *   `:html` - Activates syntax highlighting for HTML, CSS, and JavaScript code within the tab.
         *   **Screenshot:** Notes tab with `:html` mode active, showing some highlighted code.
