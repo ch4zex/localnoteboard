@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catppuccin Dashboard</title>
+    <link rel="icon" href="favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="mobile.css">
     <style>
         :root {
             --base: #1e1e2e;
@@ -57,7 +59,7 @@
             grid-template-columns: 500px 300px;
             grid-template-rows: auto 60px 150px 225px auto;
             gap: var(--gap);
-            width: 820px; /* 500 + 300 + gap */
+            width: 820px;
             height: auto;
             transition: transform 0.3s ease;
             transform-origin: center;
@@ -74,7 +76,7 @@
             display: flex; 
             flex-direction: column;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            transition: border-left 0.3s ease, padding-left 0.3s ease;
+            transition: border-left-color 0.3s ease;
         }
         #dashboard-container:not(.fullscreen-mode) .command-box {
             overflow: visible;
@@ -82,9 +84,22 @@
 
         .box { --hover-border-color: var(--accent); }
 
+        .box::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; bottom: 0;
+            width: 4px;
+            background-color: var(--hover-border-color);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 10;
+        }
         .box:hover {
-            border-left: 6px solid var(--hover-border-color);
-            padding-left: 11px;
+            border-left-color: var(--hover-border-color);
+        }
+        .box:hover::after {
+            opacity: 1;
         }
         .box::before {
             content: " ";
@@ -97,7 +112,6 @@
             z-index: 5;
         }
 
-        /* Sidebar Wrapper Logic */
         #left-sidebar {
             display: contents;
         }
@@ -115,7 +129,6 @@
             grid-row: 1 / span 5;
         }
 
-        /* Right Sidebar Wrapper */
         #right-sidebar {
             display: contents;
         }
@@ -133,7 +146,6 @@
             display: flex; 
         }
 
-        /* Minimierung Styles */
         .min-btn {
             display: none;
             cursor: pointer;
@@ -167,7 +179,6 @@
             padding-bottom: 0 !important;
         }
         
-        /* Rail Sidebar Grid Logic (Independent for both sides) */
         .all-minimized-left.fullscreen-mode {
             grid-template-columns: 60px 1fr minmax(150px, 300px) !important;
         }
@@ -231,7 +242,6 @@
 
     .fullscreen-mode .command-box { display: none; }
 
-    /* Grid Positionen */
     .command-box {
         grid-column: 1 / span 2;
         grid-row: 2;
@@ -410,7 +420,6 @@
         }
         #search-results-container::-webkit-scrollbar { display: none; }
 
-        /* Normal Mode Search Results (Overlay) */
         #dashboard-container:not(.fullscreen-mode) #search-results-container {
             position: absolute;
             top: 80px;
@@ -419,7 +428,6 @@
             height: 415px; 
         }
 
-        /* Fullscreen Mode Search */
         .fullscreen-mode .command-box {
             grid-column: auto;
             grid-row: auto;
@@ -483,10 +491,6 @@
             user-select: none;
             pointer-events: none;
             background-color: var(--base);
-        }
-
-        .notes-box:hover {
-            padding-left: 2px;
         }
 
         .notes-box .header {
@@ -799,7 +803,6 @@
             color: var(--text);
         }
 
-        /* Timer Side Panel Logic */
         .timer-content-wrapper {
             display: flex;
             flex: 1;
@@ -1012,7 +1015,6 @@
         .help-desc { color: var(--subtext0); }
         .help-cmd { color: var(--blue); font-weight: bold; }
 
-        /* Task Manager Styles */
         .task-manager-box {
             display: none;
         }
@@ -1057,7 +1059,7 @@
             display: flex;
             grid-column: 3;
             grid-row: 5;
-            height: 110px; /* Kompakte, feste Höhe */
+            height: 110px;
         }
 
         .dump-box .controls {
@@ -1072,6 +1074,112 @@
             flex: 1;
             font-size: 11px;
             font-weight: bold;
+        }
+
+        .todo-reminder-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .todo-datetime {
+            background: var(--surface0);
+            border: 1px solid transparent;
+            color: var(--subtext0);
+            font-family: inherit;
+            font-size: 11px;
+            padding: 3px 5px;
+            outline: none;
+            border-radius: 3px;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .todo-datetime:focus {
+            border-color: var(--mauve);
+            color: var(--text);
+        }
+        .todo-datetime::-webkit-calendar-picker-indicator {
+            filter: invert(0.8);
+            cursor: pointer;
+        }
+        .todo-reminder-btn {
+            padding: 3px 8px;
+            font-size: 10px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .todo-reminder-status {
+            font-size: 10px;
+            color: var(--subtext0);
+            width: 45px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        #tablet-overlay-toggle {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1000;
+            transition: background-color 0.3s, opacity 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        #tablet-overlay-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.8);
+            opacity: 1 !important;
+        }
+        #tablet-overlay-toggle.typing-fade {
+            opacity: 0.4;
+        }
+        #tablet-overlay-buttons {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        #tablet-overlay-buttons.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+        .tablet-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            color: #000;
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .tablet-btn:hover {
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        .tablet-btn svg, #tablet-overlay-toggle svg {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
     </style>
 </head>
@@ -1242,6 +1350,22 @@
         </div>
     </div>
 
+    <!-- Tablet Overlay Buttons -->
+    <div id="tablet-overlay-toggle" onclick="toggleTabletOverlay()" title="Toggle Tablet Actions">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+    </div>
+    <div id="tablet-overlay-buttons">
+        <button class="tablet-btn" onclick="actionToggleNoteSize()" title="Toggle Note Size (Space+Q)">
+            <svg viewBox="0 0 24 24"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"></path></svg>
+        </button>
+        <button class="tablet-btn" onclick="actionToggleFullscreen()" title="Toggle Fullscreen (Space+F)">
+            <svg viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path></svg>
+        </button>
+        <button class="tablet-btn" onclick="actionToggleMinimizeAll()" title="Minimize/Maximize All (Space+M)">
+            <svg viewBox="0 0 24 24"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7"></path></svg>
+        </button>
+    </div>
+
     <script>
         /** --- GLOBAL UTILITIES --- **/
         const chars = "!<>-_\\/[]{}@#$%^&*()_+{}:\"?><,.";
@@ -1315,14 +1439,14 @@
         function showSearchResults() {
             const isFullscreen = document.getElementById('dashboard-container').classList.contains('fullscreen-mode');
             searchResultsContainer.style.display = 'block';
-            if (isFullscreen) {
+            if (isFullscreen || window.innerWidth <= 768) {
                 searchResultsContainer.style.height = '300px';
             }
         }
 
         function hideSearchResults() {
             const isFullscreen = document.getElementById('dashboard-container').classList.contains('fullscreen-mode');
-            if (isFullscreen) {
+            if (isFullscreen || window.innerWidth <= 768) {
                 searchResultsContainer.style.height = '0px';
             } else {
                 searchResultsContainer.style.display = 'none';
@@ -1346,7 +1470,6 @@
                     let score = 0;
                     let bestSnippet = '';
 
-                    // Search content
                     let searchableContent = tab.content;
                     if (tab.content.startsWith('!!TODO!!')) {
                         try {
@@ -1371,7 +1494,6 @@
                         bestSnippet = escapeHTML(snippet).replace(termRegex, '<strong>$&</strong>');
                     }
 
-                    // Search tab name
                     if (tab.name.toLowerCase().includes(term)) {
                         score += 5;
                         if (!bestSnippet) {
@@ -1379,7 +1501,6 @@
                         }
                     }
 
-                    // Search category name
                     if (cat.name.toLowerCase().includes(term)) {
                         score += 10;
                         if (!bestSnippet) {
@@ -1509,11 +1630,60 @@
             container.style.transform = `scale(${scale})`;
         }
 
-        const resizeObserver = new ResizeObserver(() => handleScaling());
+        function updateMobileLayout() {
+            const container = document.getElementById('dashboard-container');
+            const notesBox = document.querySelector('.notes-box');
+            const commandBox = document.querySelector('.command-box');
+            const searchResults = document.getElementById('search-results-container');
+            
+            if (!container || !notesBox || !commandBox || !searchResults) return;
+
+            if (window.innerWidth <= 768 || container.classList.contains('fullscreen-mode')) {
+                if (commandBox.parentElement !== notesBox) {
+                    notesBox.prepend(commandBox);
+                    commandBox.appendChild(searchResults);
+                }
+            } else {
+                if (commandBox.parentElement === notesBox) {
+                    const leftSidebar = document.getElementById('left-sidebar');
+                    if (leftSidebar) {
+                        container.insertBefore(commandBox, leftSidebar);
+                        container.insertBefore(searchResults, commandBox.nextSibling);
+                    }
+                }
+            }
+        }
+
+        const resizeObserver = new ResizeObserver(() => {
+            handleScaling();
+            updateMobileLayout();
+            if (typeof autoResizeNotes === 'function') autoResizeNotes();
+            if (typeof updateLineNumbers === 'function') updateLineNumbers();
+        });
         resizeObserver.observe(document.getElementById('dashboard-container'));
 
-        window.addEventListener('resize', handleScaling);
+        let previousWidth = window.innerWidth;
+        window.addEventListener('resize', () => {
+            const currentWidth = window.innerWidth;
+            const container = document.getElementById('dashboard-container');
+            
+            if (container && container.classList.contains('fullscreen-mode') && currentWidth <= 1200 && previousWidth > 1200) {
+                document.querySelectorAll('.box .min-btn').forEach(btn => {
+                    const box = btn.closest('.box');
+                    if (!box.classList.contains('minimized')) {
+                        toggleMinimize(btn, '');
+                    }
+                });
+            }
+            previousWidth = currentWidth;
+
+            handleScaling();
+            updateMobileLayout();
+            if (typeof autoResizeNotes === 'function') autoResizeNotes();
+            if (typeof updateLineNumbers === 'function') updateLineNumbers();
+        });
         handleScaling();
+        updateMobileLayout();
 
         /** CLOCK LOGIC **/
         const timezoneInput = document.getElementById('timezone-input');
@@ -1858,6 +2028,10 @@
             const style = window.getComputedStyle(notesArea);
             const lineHeight = style.lineHeight;
 
+            const pLeft = parseFloat(style.paddingLeft) || 0;
+            const pRight = parseFloat(style.paddingRight) || 0;
+            const effectiveWidth = notesArea.clientWidth - pLeft - pRight;
+
             let mirror = document.getElementById('line-mirror');
             if (!mirror) {
                 mirror = document.createElement('div');
@@ -1867,8 +2041,10 @@
 
             mirror.style.cssText = `
                 position: absolute; top: -9999px; left: -9999px;
-                width: ${notesArea.clientWidth}px;
-                font: ${style.font};
+                width: ${effectiveWidth}px;
+                font-family: ${style.fontFamily};
+                font-size: ${style.fontSize};
+                letter-spacing: ${style.letterSpacing};
                 line-height: ${lineHeight};
                 white-space: pre-wrap;
                 word-wrap: break-word;
@@ -1912,6 +2088,13 @@
             }
         });
         notesAreaObserver.observe(notesArea);
+
+        if (document.fonts) {
+            document.fonts.ready.then(() => {
+                if (typeof updateLineNumbers === 'function') updateLineNumbers();
+                if (typeof autoResizeNotes === 'function') autoResizeNotes();
+            });
+        }
 
 
         let categoriesData = [];
@@ -2138,8 +2321,71 @@
                     updateTodoData(tab, todos);
                 };
 
+                const remWrapper = document.createElement('div');
+                remWrapper.className = 'todo-reminder-wrapper';
+                
+                const bellIcon = document.createElement('div');
+                bellIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>';
+                bellIcon.style.display = 'flex';
+                bellIcon.style.color = 'var(--subtext0)';
+                bellIcon.style.alignItems = 'center';
+
+                const remInput = document.createElement('input');
+                remInput.type = 'datetime-local';
+                remInput.className = 'todo-datetime';
+                if (todo.reminder && todo.reminder.time) {
+                    remInput.value = todo.reminder.time;
+                }
+
+                const remBtn = document.createElement('button');
+                remBtn.className = 'todo-reminder-btn';
+                remBtn.textContent = 'SET';
+
+                const remStatus = document.createElement('span');
+                remStatus.className = 'todo-reminder-status';
+                if (todo.reminder && todo.reminder.time && !todo.reminder.notified) {
+                    remStatus.textContent = 'ACTIVE';
+                    remStatus.style.color = 'var(--green)';
+                    bellIcon.style.color = 'var(--green)';
+                }
+
+                remBtn.onclick = () => {
+                    if (!remInput.value) {
+                        const now = new Date();
+                        const offset = now.getTimezoneOffset() * 60000;
+                        remInput.value = (new Date(now - offset)).toISOString().slice(0, 16);
+                    }
+                    Notification.requestPermission().then(perm => {
+                        if (perm === 'granted') {
+                            todos[index].reminder = { time: remInput.value, notified: false };
+                            tab.content = '!!TODO!!' + JSON.stringify(todos);
+                            syncNotes();
+                            
+                            remStatus.textContent = 'SAVED!';
+                            remStatus.style.color = 'var(--green)';
+                            bellIcon.style.color = 'var(--green)';
+                            remBtn.style.backgroundColor = 'var(--green)';
+                            remBtn.style.color = 'var(--base)';
+                            
+                            setTimeout(() => {
+                                remBtn.style.backgroundColor = 'transparent';
+                                remBtn.style.color = 'var(--text)';
+                                remStatus.textContent = 'ACTIVE';
+                            }, 2000);
+                        } else {
+                            alert('Notifications are disabled in your browser settings.');
+                        }
+                    });
+                };
+
+                remWrapper.appendChild(bellIcon);
+                remWrapper.appendChild(remInput);
+                remWrapper.appendChild(remBtn);
+                remWrapper.appendChild(remStatus);
+
                 item.appendChild(cb);
                 item.appendChild(input);
+                item.appendChild(remWrapper);
                 item.appendChild(del);
                 todoListContainer.appendChild(item);
             });
@@ -2594,12 +2840,87 @@
         focusTimeInput.addEventListener('input', handleTimeInputChange);
         breakTimeInput.addEventListener('input', handleTimeInputChange);
 
+        /** --- TABLET OVERLAY LOGIC --- **/
+        function toggleTabletOverlay() {
+            const btns = document.getElementById('tablet-overlay-buttons');
+            btns.classList.toggle('active');
+        }
+
+        function actionToggleNoteSize() {
+            const notesBoxQ = document.querySelector('.notes-box');
+            if (notesBoxQ) {
+                const isExpanded = notesBoxQ.style.height === '600px';
+                notesBoxQ.style.height = isExpanded ? '225px' : '600px';
+                if (typeof updateLineNumbers === 'function') updateLineNumbers();
+            }
+        }
+
+        function actionToggleFullscreen() {
+            const container = document.getElementById('dashboard-container');
+            if (!container) return;
+            container.classList.toggle('fullscreen-mode');
+
+            if (!container.classList.contains('fullscreen-mode')) {
+                const searchResultsContainer = document.getElementById('search-results-container');
+                if (searchResultsContainer) searchResultsContainer.style.height = '';
+                if (typeof hideSearchResults === 'function') hideSearchResults();
+
+                document.querySelectorAll('.box.minimized').forEach(box => {
+                    box.classList.remove('minimized');
+                    const btn = box.querySelector('.min-btn');
+                    if (btn) btn.textContent = '[ - ]';
+                });
+                container.classList.remove('all-minimized-left', 'all-minimized-right');
+            } else {
+                if (window.innerWidth <= 1200) {
+                    document.querySelectorAll('.box .min-btn').forEach(btn => {
+                        const box = btn.closest('.box');
+                        if (!box.classList.contains('minimized')) {
+                            if (typeof toggleMinimize === 'function') toggleMinimize(btn, '');
+                        }
+                    });
+                }
+            }
+            if (typeof updateMobileLayout === 'function') updateMobileLayout();
+            if (typeof handleScaling === 'function') handleScaling(); 
+            if (typeof updateLineNumbers === 'function') updateLineNumbers();
+        }
+
+        function actionToggleMinimizeAll() {
+            const container = document.getElementById('dashboard-container');
+            if (container && container.classList.contains('fullscreen-mode')) {
+                const minBtns = document.querySelectorAll('.box .min-btn');
+                const anyOpen = Array.from(minBtns).some(btn => !btn.closest('.box').classList.contains('minimized'));
+                
+                minBtns.forEach(btn => {
+                    const isMinimized = btn.closest('.box').classList.contains('minimized');
+                    if (anyOpen ? !isMinimized : isMinimized) {
+                        if (typeof toggleMinimize === 'function') toggleMinimize(btn, '');
+                    }
+                });
+            }
+        }
+
         /** --- KEYBOARD SHORTCUTS --- **/
         let isSpacePressed = false;
+        let typingFadeTimeout;
 
         window.addEventListener('keydown', (e) => {
             const container = document.getElementById('dashboard-container');
             if (!container) return;
+
+            const overlayToggle = document.getElementById('tablet-overlay-toggle');
+            const overlayBtns = document.getElementById('tablet-overlay-buttons');
+            if (overlayBtns && overlayBtns.classList.contains('active')) {
+                overlayBtns.classList.remove('active');
+            }
+            if (overlayToggle) {
+                overlayToggle.classList.add('typing-fade');
+                clearTimeout(typingFadeTimeout);
+                typingFadeTimeout = setTimeout(() => {
+                    if (overlayToggle) overlayToggle.classList.remove('typing-fade');
+                }, 2000);
+            }
 
             const isTyping = e.target.tagName === 'INPUT' || 
                             e.target.tagName === 'TEXTAREA' || 
@@ -2658,29 +2979,7 @@
 
                 switch (e.code) {
                     case 'KeyF':
-                        const notesBox = document.querySelector('.notes-box');
-                        container.classList.toggle('fullscreen-mode');
-
-                        if (!container.classList.contains('fullscreen-mode')) {
-                            container.insertBefore(commandBox, document.getElementById('left-sidebar'));
-                            container.insertBefore(searchResultsContainer, commandBox.nextSibling);
-                            
-                            searchResultsContainer.style.height = '';
-                            hideSearchResults();
-
-                            document.querySelectorAll('.box.minimized').forEach(box => {
-                                box.classList.remove('minimized');
-                                const btn = box.querySelector('.min-btn');
-                                if (btn) btn.textContent = '[ - ]';
-                            });
-                            container.classList.remove('all-minimized-left', 'all-minimized-right');
-                        } else {
-                            notesBox.prepend(commandBox);
-                            commandBox.appendChild(searchResultsContainer);
-                        }
-
-                        handleScaling(); 
-                        updateLineNumbers();
+                        actionToggleFullscreen();
                         break;
                     case 'ArrowLeft':
                         switchTabRelative(-1, false);
@@ -2689,25 +2988,10 @@
                         switchTabRelative(1, false);
                         break;
                     case 'KeyQ':
-                        const notesBoxQ = document.querySelector('.notes-box');
-                        if (notesBoxQ) {
-                            const isExpanded = notesBoxQ.style.height === '600px';
-                            notesBoxQ.style.height = isExpanded ? '225px' : '600px';
-                            if (typeof updateLineNumbers === 'function') updateLineNumbers();
-                        }
+                        actionToggleNoteSize();
                         break;
                     case 'KeyM':
-                        if (container.classList.contains('fullscreen-mode')) {
-                            const minBtns = document.querySelectorAll('.box .min-btn');
-                            const anyOpen = Array.from(minBtns).some(btn => !btn.closest('.box').classList.contains('minimized'));
-                            
-                            minBtns.forEach(btn => {
-                                const isMinimized = btn.closest('.box').classList.contains('minimized');
-                                if (anyOpen ? !isMinimized : isMinimized) {
-                                    toggleMinimize(btn, '');
-                                }
-                            });
-                        }
+                        actionToggleMinimizeAll();
                         break;
                     case 'KeyW':
                         if (addNoteTabBtn) addNoteTabBtn.click();
@@ -2743,7 +3027,7 @@
         /** --- MINIMIZE LOGIC --- **/
         function toggleMinimize(btn, type) {
             const container = document.getElementById('dashboard-container');
-            if (!container.classList.contains('fullscreen-mode')) return;
+            if (!container.classList.contains('fullscreen-mode') && window.innerWidth > 768) return;
 
             const box = btn.closest('.box');
             const isMinimized = box.classList.toggle('minimized');
@@ -2755,7 +3039,7 @@
 
         function handleBoxClick(event, type) {
             const container = document.getElementById('dashboard-container');
-            if (!container.classList.contains('fullscreen-mode')) return;
+            if (!container.classList.contains('fullscreen-mode') && window.innerWidth > 768) return;
 
             if (event.target.closest('input, button, a, textarea, #edit-links-toggle')) return;
 
@@ -2831,6 +3115,53 @@
             reader.readAsText(file);
         });
 
+        /** --- REMINDER NOTIFICATIONS --- **/
+        function checkReminders() {
+            if (Notification.permission !== "granted") return;
+            let needsSync = false;
+            const now = new Date().getTime();
+
+            categoriesData.forEach(cat => {
+                cat.tabs.forEach(tab => {
+                    if (tab.content.startsWith('!!TODO!!')) {
+                        try {
+                            let todos = JSON.parse(tab.content.replace('!!TODO!!', ''));
+                            let tabChanged = false;
+                            todos.forEach(todo => {
+                                if (!todo.done && todo.reminder && todo.reminder.time && !todo.reminder.notified) {
+                                    const reminderTime = new Date(todo.reminder.time).getTime();
+                                    if (now >= reminderTime) {
+                                        new Notification("NoteBoard Task", {
+                                            body: todo.text || "Pending task reminder!",
+                                        });
+                                        todo.reminder.notified = true;
+                                        tabChanged = true;
+                                        needsSync = true;
+                                    }
+                                }
+                            });
+                            if (tabChanged) {
+                                tab.content = '!!TODO!!' + JSON.stringify(todos);
+                            }
+                        } catch (e) {}
+                    }
+                });
+            });
+
+            if (needsSync) {
+                syncNotes();
+                if (activeTabId) {
+                    const activeTabInfo = findTab(activeTabId);
+                    if (activeTabInfo.tab && activeTabInfo.tab.content.startsWith('!!TODO!!')) {
+                        const isTyping = document.activeElement && document.activeElement.classList.contains('todo-text');
+                        if (!isTyping) renderTodoView(activeTabInfo.tab);
+                    }
+                }
+            }
+        }
+
+        setInterval(checkReminders, 10000);
+
         /** --- INITIALIZATION --- **/
         async function initDashboard() {
             const config = JSON.parse(localStorage.getItem('dash_config')) || {};
@@ -2845,6 +3176,14 @@
             } else {
                 focusData = { date: today, totalSeconds: 0 };
                 localStorage.setItem('dash_focus_data', JSON.stringify(focusData));
+            }
+
+            if (window.innerWidth <= 768) {
+                document.querySelectorAll('.clock-box, .timer-box').forEach(box => {
+                    box.classList.add('minimized');
+                    const btn = box.querySelector('.min-btn');
+                    if (btn) btn.textContent = '[ + ]';
+                });
             }
 
             scratchpadArea.value = localStorage.getItem('dash_scratchpad') || '';
