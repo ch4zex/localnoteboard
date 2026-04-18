@@ -1,0 +1,173 @@
+@media (max-width: 768px) {
+    html, body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    #dashboard-wrapper {
+        height: 100dvh;
+        width: 100vw;
+        align-items: stretch;
+        display: flex;
+    }
+
+    #dashboard-container {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        height: 100% !important;
+        padding: 10px !important;
+        gap: 10px !important;
+        box-sizing: border-box;
+        transform: none !important;
+    }
+
+    .scratchpad-box,
+    .task-manager-box,
+    .links-box,
+    .dump-box,
+    #tablet-overlay-toggle,
+    #tablet-overlay-buttons {
+        display: none !important;
+    }
+
+    .auth-box { order: 0 !important; }
+    .clock-box { order: 1 !important; }
+    .timer-box { order: 2 !important; }
+    .notes-box { order: 3 !important; }
+    
+    .notes-box .command-box {
+        width: auto !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        padding: 0 0 10px 0 !important;
+        margin: 0 !important;
+        position: static !important;
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 0 0 auto !important;
+    }
+
+    .notes-box #search-results-container {
+        position: static !important;
+        width: 100% !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        transition: height 0.3s ease-in-out !important;
+        overflow-y: auto !important;
+    }
+
+    .notes-box #search-results-container .search-result-item {
+        background-color: var(--mantle) !important;
+    }
+
+    #left-sidebar, #right-sidebar {
+        display: contents !important;
+    }
+
+    .box {
+        width: 100% !important;
+        margin: 0 !important;
+        box-sizing: border-box;
+    }
+
+    .clock-box, .timer-box {
+        flex: 0 0 auto !important;
+    }
+
+    .box .header {
+        cursor: pointer;
+    }
+
+    .box:hover {
+        border-left-color: var(--surface0) !important;
+    }
+    .box::after {
+        display: none !important;
+    }
+
+    .box .min-btn {
+        display: inline-block !important;
+    }
+
+    .notes-box {
+        flex: 1 1 auto !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .notes-content-wrapper {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+    }
+
+    .auth-box {
+        flex: 0 0 auto !important;
+    }
+    
+    #dashboard-container.locked .clock-box,
+    #dashboard-container.locked .timer-box,
+    #dashboard-container.locked .notes-box,
+    #dashboard-container.locked .command-box,
+    #dashboard-container.locked #search-results-container {
+        display: none !important;
+    }
+
+    .clock-display { font-size: 40px !important; }
+    .timer-display { font-size: 48px !important; }
+    #notes-area, .todo-text { font-size: 11px !important; line-height: 17px !important; }
+    .line-numbers { font-size: 11px !important; line-height: 17px !important; width: 4ch !important; }
+    .header { font-size: 9px !important; }
+    .status-text { font-size: 8px !important; }
+    .tab-name-input, #category-display { font-size: 11px !important; }
+    .tab-name-input { width: 78px !important; }
+    #category-display { white-space: nowrap !important; flex-shrink: 0 !important; }
+    .command-input { font-size: 16px !important; }
+    .search-result-item { font-size: 10px !important; }
+    .todo-datetime, .todo-reminder-btn, .todo-reminder-status { font-size: 8px !important; }
+    button { font-size: 8px !important; }
+    .min-btn { font-size: 14px !important; }
+    .tab-nav-btn, .add-tab-btn { font-size: 18px !important; padding: 0 2px !important; }
+    .timer-input { font-size: 9px !important; }
+    .focus-core-label { font-size: 9px !important; }
+
+    .clock-box .min-btn,
+    .timer-box .min-btn {
+        display: none !important;
+    }
+
+    .todo-item {
+        flex-wrap: wrap !important;
+        gap: 6px 12px !important;
+    }
+    .todo-checkbox { order: 1 !important; }
+    .todo-text { order: 2 !important; flex: 1 1 0% !important; min-width: 0 !important; }
+    .todo-delete { order: 3 !important; flex: 0 0 auto !important; margin-left: auto !important; }
+    
+    .todo-reminder-wrapper {
+        order: 4 !important;
+        flex: 1 1 100% !important;
+        margin-left: 30px !important;
+        margin-top: 2px !important;
+        justify-content: flex-start !important;
+    }
+
+    .notes-content-wrapper {
+        padding-bottom: 80px !important;
+        scroll-behavior: smooth;
+        overscroll-behavior-y: contain;
+    }
+
+    #notes-area {
+        min-height: 100% !important;
+    }
+}
