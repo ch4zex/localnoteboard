@@ -1015,6 +1015,26 @@
         .help-desc { color: var(--subtext0); }
         .help-cmd { color: var(--blue); font-weight: bold; }
 
+        /* --- CALENDAR WIDGET --- */
+        #calendar-view-container { display: none; flex: 1; overflow-y: auto; padding: 10px; flex-direction: column; gap: 8px; scrollbar-width: none; }
+        #calendar-view-container::-webkit-scrollbar { display: none; }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .calendar-header button { font-size: 16px; padding: 2px 10px; border: 1px solid var(--surface0); background: transparent; color: var(--subtext0); cursor: pointer; transition: all 0.2s; }
+        .calendar-header button:hover { color: var(--green); border-color: var(--green); }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; flex: 1; min-height: 250px; }
+        .calendar-day-header { text-align: center; font-weight: bold; color: var(--mauve); font-size: 11px; padding-bottom: 5px; border-bottom: 1px solid var(--surface0); }
+        .calendar-cell { border: 1px solid var(--surface0); padding: 4px; display: flex; flex-direction: column; background: var(--mantle); transition: border-color 0.2s; border-radius: 4px; height: 80px; cursor: pointer; }
+        .calendar-cell:hover { border-color: var(--accent); }
+        .calendar-cell.today { border-color: var(--green); background: rgba(166, 227, 161, 0.05); }
+        .calendar-date { font-size: 10px; color: var(--subtext0); margin-bottom: 4px; text-align: right; font-weight: bold; }
+        .calendar-cell-indicators { display: flex; gap: 4px; flex-wrap: wrap; margin-top: auto; padding: 2px; }
+        .cal-indicator { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); }
+        .cal-indicator.done { background: var(--surface0); }
+        .cal-indicator.bday { background: transparent; width: auto; height: auto; font-size: 10px; border-radius: 0; line-height: 1; }
+        .bday-btn { cursor: pointer; opacity: 0.4; transition: opacity 0.2s; font-size: 14px; user-select: none; }
+        .bday-btn:hover { opacity: 0.8; }
+        .bday-btn.active { opacity: 1; filter: drop-shadow(0 0 4px var(--peach)); }
+
         .task-manager-box {
             display: none;
         }
@@ -1336,12 +1356,14 @@
                     <button id="scroll-right-tabs" class="tab-nav-btn">&gt;</button>
                     <span id="add-note-tab" class="add-tab-btn">+</span>
                 </div>
+                <div id="onetodo-container" style="display: none; margin-bottom: 8px;"></div>
                 <div class="notes-content-wrapper">
                     <div class="line-numbers" id="line-numbers"></div>
                     <div style="flex: 1; position: relative;">
                         <div id="highlight-layer"></div>
                         <textarea id="notes-area" placeholder="> ENTER_DATA_" spellcheck="false"></textarea>
                         <div id="todo-list-container"></div>
+                        <div id="calendar-view-container"></div>
                         <div id="help-view-container"></div>
                     </div>
                 </div>
@@ -1478,6 +1500,16 @@
                         } catch (e) { searchableContent = ''; }
                     } else if (tab.content.startsWith('!!HTML!!')) {
                         searchableContent = tab.content.substring(8);
+                    } else if (tab.content.startsWith('!!CAL!!')) {
+                        let calText = [];
+                        Object.values(globalCalendarData).forEach(val => {
+                            if (Array.isArray(val)) calText.push(...val.map(t => t.text));
+                            else if (typeof val === 'string') calText.push(val);
+                        });
+                        searchableContent = calText.join('\n');
+                    }
+                    if (tab.onetodo && tab.onetodo.text) {
+                        searchableContent += '\n' + tab.onetodo.text;
                     }
 
                     const contentLower = searchableContent.toLowerCase();
@@ -1695,10 +1727,12 @@
                 dash_timezone: currentTimezone,
                 dash_focus_time: focusDurationSeconds / 60,
                 dash_break_time: breakDurationSeconds / 60,
+                dash_fcore_interval: chargeIntervalSeconds,
                 dash_notes_active_id: activeTabId,
                 dash_notes_active_cat_id: activeCategoryId
             };
             localStorage.setItem('dash_config', JSON.stringify(config));
+            localStorage.setItem('dash_calendar_data', JSON.stringify(globalCalendarData));
         });
         
         function updateHeader(val) {
@@ -2101,6 +2135,8 @@
         let viewState = 'CATEGORIES';
         let activeCategoryId = null;
         let activeTabId = null;
+        let globalCalendarData = {};
+        let currentCalendarDate = new Date();
 
         const syncNotes = debounce(() => {
             localStorage.setItem('dash_notes_tabs', JSON.stringify(categoriesData));
@@ -2123,6 +2159,8 @@
                             } catch (e) { isEmpty = true; }
                         } else if (tab.content.startsWith('!!HTML!!')) {
                             isEmpty = tab.content.replace('!!HTML!!', '').trim() === '';
+                        } else if (tab.content.startsWith('!!CAL!!')) {
+                            isEmpty = false;
                         } else {
                             isEmpty = tab.content.trim() === '';
                         }
@@ -2448,12 +2486,498 @@
             syncNotes();
         }
 
+        /** --- FIXED ONE TODO LOGIC --- **/
+        function renderOneTodo(tab) {
+            const container = document.getElementById('onetodo-container');
+            if (!container) return;
+            
+            if (!tab || !tab.onetodo) {
+                container.style.display = 'none';
+                container.innerHTML = '';
+                return;
+            }
+            
+            container.style.display = 'block';
+            container.innerHTML = '';
+            
+            const item = document.createElement('div');
+            item.className = 'todo-item';
+            item.style.padding = '8px 12px';
+            item.style.margin = '0';
+            
+            const cb = document.createElement('div');
+            cb.className = 'todo-checkbox';
+            if (tab.onetodo.done) cb.classList.add('checked');
+            cb.onclick = () => {
+                tab.onetodo.done = !tab.onetodo.done;
+                renderOneTodo(tab);
+                syncNotes();
+            };
+            
+            const input = document.createElement('input');
+            input.id = 'onetodo-input';
+            input.className = `todo-text ${tab.onetodo.done ? 'completed' : ''}`;
+            input.value = tab.onetodo.text;
+            input.placeholder = '> ENTER_TASK_';
+            input.onchange = (e) => {
+                tab.onetodo.text = e.target.value;
+                syncNotes();
+            };
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    notesArea.focus();
+                }
+            });
+            
+            const del = document.createElement('div');
+            del.className = 'todo-delete';
+            del.innerHTML = '×';
+            del.onclick = () => {
+                delete tab.onetodo;
+                renderOneTodo(tab);
+                syncNotes();
+                notesArea.focus();
+            };
+
+            const remWrapper = document.createElement('div');
+            remWrapper.className = 'todo-reminder-wrapper';
+            
+            const bellIcon = document.createElement('div');
+            bellIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>';
+            bellIcon.style.display = 'flex';
+            bellIcon.style.color = 'var(--subtext0)';
+            bellIcon.style.alignItems = 'center';
+
+            const remInput = document.createElement('input');
+            remInput.type = 'datetime-local';
+            remInput.className = 'todo-datetime';
+            if (tab.onetodo.reminder && tab.onetodo.reminder.time) {
+                remInput.value = tab.onetodo.reminder.time;
+            }
+
+            const remBtn = document.createElement('button');
+            remBtn.className = 'todo-reminder-btn';
+            remBtn.textContent = 'SET';
+
+            const remStatus = document.createElement('span');
+            remStatus.className = 'todo-reminder-status';
+            if (tab.onetodo.reminder && tab.onetodo.reminder.time && !tab.onetodo.reminder.notified) {
+                remStatus.textContent = 'ACTIVE';
+                remStatus.style.color = 'var(--green)';
+                bellIcon.style.color = 'var(--green)';
+            }
+
+            remBtn.onclick = () => {
+                if (!remInput.value) {
+                    const now = new Date();
+                    const offset = now.getTimezoneOffset() * 60000;
+                    remInput.value = (new Date(now - offset)).toISOString().slice(0, 16);
+                }
+                Notification.requestPermission().then(perm => {
+                    if (perm === 'granted') {
+                        tab.onetodo.reminder = { time: remInput.value, notified: false };
+                        syncNotes();
+                        
+                        remStatus.textContent = 'SAVED!';
+                        remStatus.style.color = 'var(--green)';
+                        bellIcon.style.color = 'var(--green)';
+                        remBtn.style.backgroundColor = 'var(--green)';
+                        remBtn.style.color = 'var(--base)';
+                        
+                        setTimeout(() => {
+                            remBtn.style.backgroundColor = 'transparent';
+                            remBtn.style.color = 'var(--text)';
+                            remStatus.textContent = 'ACTIVE';
+                        }, 2000);
+                    } else {
+                        alert('Notifications are disabled in your browser settings.');
+                    }
+                });
+            };
+
+            remWrapper.appendChild(bellIcon);
+            remWrapper.appendChild(remInput);
+            remWrapper.appendChild(remBtn);
+            remWrapper.appendChild(remStatus);
+
+            item.appendChild(cb);
+            item.appendChild(input);
+            item.appendChild(remWrapper);
+            item.appendChild(del);
+            container.appendChild(item);
+        }
+
+        /** --- CALENDAR VIEW LOGIC --- **/
+        function injectBirthdays(targetDateStr) {
+            const mmdd = targetDateStr.substring(5);
+            let targetArray = globalCalendarData[targetDateStr] || [];
+            let modified = false;
+            for (let key in globalCalendarData) {
+                if (key !== targetDateStr && key.endsWith(mmdd)) {
+                    const pastTasks = globalCalendarData[key];
+                    if (Array.isArray(pastTasks)) {
+                        pastTasks.forEach(pt => {
+                            if (pt.isBirthday) {
+                                const exists = targetArray.some(t => t.text === pt.text && t.isBirthday);
+                                if (!exists) {
+                                    targetArray.push({ text: pt.text, done: false, isBirthday: true });
+                                    modified = true;
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+            if (modified) {
+                globalCalendarData[targetDateStr] = targetArray;
+                syncConfig();
+            }
+        }
+
+        function openCalendarTodo(dateStr) {
+            const container = document.getElementById('calendar-view-container');
+            let overlay = document.getElementById('calendar-todo-overlay');
+            if (!overlay) return;
+            
+            overlay.innerHTML = '';
+            overlay.style.display = 'flex';
+
+            const header = document.createElement('div');
+            header.className = 'header';
+            header.style.marginBottom = '15px';
+            header.style.zIndex = '60';
+            
+            const title = document.createElement('div');
+            title.style.color = 'var(--mauve)';
+            title.style.fontWeight = 'bold';
+            title.textContent = `TASKS: ${dateStr}`;
+            
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = 'CLOSE';
+            closeBtn.onclick = () => {
+                overlay.style.display = 'none';
+                renderCalendarView();
+            };
+            
+            header.appendChild(title);
+            header.appendChild(closeBtn);
+            overlay.appendChild(header);
+
+            const listContainer = document.createElement('div');
+            listContainer.style.flex = '1';
+            listContainer.style.overflowY = 'auto';
+            listContainer.style.display = 'flex';
+            listContainer.style.flexDirection = 'column';
+            listContainer.style.gap = '8px';
+            listContainer.style.scrollbarWidth = 'none';
+
+            let tasks = globalCalendarData[dateStr] || [];
+            if (typeof tasks === 'string') {
+                tasks = tasks.trim() ? [{ text: tasks, done: false }] : [];
+                globalCalendarData[dateStr] = tasks;
+            }
+
+            function save() {
+                globalCalendarData[dateStr] = tasks.filter(t => t.text.trim() !== '' || t.isBirthday || t.reminder); 
+                syncConfig();
+            }
+
+            function saveAndRender() {
+                save();
+                renderTasks();
+            }
+
+            function renderTasks() {
+                listContainer.innerHTML = '';
+                tasks.forEach((todo, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'todo-item';
+                    
+                    const cb = document.createElement('div');
+                    cb.className = 'todo-checkbox';
+                    if (todo.done) cb.classList.add('checked');
+                    cb.onclick = () => { todo.done = !todo.done; saveAndRender(); };
+
+                    const input = document.createElement('input');
+                    input.className = `todo-text ${todo.done ? 'completed' : ''}`;
+                    input.value = todo.text || '';
+                    input.placeholder = '> ENTER_TASK_';
+                    input.onchange = (e) => { todo.text = e.target.value; save(); };
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            todo.text = e.target.value;
+                            tasks.splice(index + 1, 0, { text: '', done: false });
+                            saveAndRender();
+                            setTimeout(() => {
+                                const inputs = listContainer.querySelectorAll('.todo-text');
+                                if (inputs[index + 1]) inputs[index + 1].focus();
+                            }, 10);
+                        }
+                    });
+
+                    const bdayBtn = document.createElement('div');
+                    bdayBtn.className = `bday-btn ${todo.isBirthday ? 'active' : ''}`;
+                    bdayBtn.textContent = '🎂';
+                    bdayBtn.title = "Repeat every year";
+                    bdayBtn.onclick = () => { 
+                        todo.isBirthday = !todo.isBirthday; 
+                        if (todo.isBirthday) {
+                            todo.reminder = { time: `${dateStr}T08:00`, notified: false };
+                            if (Notification.permission !== 'granted') Notification.requestPermission();
+                        } else {
+                            delete todo.reminder;
+                        }
+                        saveAndRender(); 
+                    };
+
+                    const del = document.createElement('div');
+                    del.className = 'todo-delete';
+                    del.innerHTML = '×';
+                    del.onclick = () => { tasks.splice(index, 1); saveAndRender(); };
+
+                    const remWrapper = document.createElement('div');
+                    remWrapper.className = 'todo-reminder-wrapper';
+                    
+                    const bellIcon = document.createElement('div');
+                    bellIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>';
+                    bellIcon.style.display = 'flex';
+                    bellIcon.style.color = 'var(--subtext0)';
+                    bellIcon.style.alignItems = 'center';
+
+                    const remInput = document.createElement('input');
+                    remInput.type = 'datetime-local';
+                    remInput.className = 'todo-datetime';
+                    if (todo.reminder && todo.reminder.time) remInput.value = todo.reminder.time;
+
+                    const remBtn = document.createElement('button');
+                    remBtn.className = 'todo-reminder-btn';
+                    remBtn.textContent = 'SET';
+
+                    const remStatus = document.createElement('span');
+                    remStatus.className = 'todo-reminder-status';
+                    if (todo.reminder && todo.reminder.time && !todo.reminder.notified) {
+                        remStatus.textContent = 'ACTIVE';
+                        remStatus.style.color = 'var(--green)';
+                        bellIcon.style.color = 'var(--green)';
+                    }
+
+                    remBtn.onclick = () => {
+                        if (!remInput.value) {
+                            const now = new Date();
+                            const offset = now.getTimezoneOffset() * 60000;
+                            remInput.value = (new Date(now - offset)).toISOString().slice(0, 16);
+                        }
+                        Notification.requestPermission().then(perm => {
+                            if (perm === 'granted') {
+                                todo.reminder = { time: remInput.value, notified: false };
+                                saveAndRender();
+                            } else {
+                                alert('Notifications are disabled in your browser settings.');
+                            }
+                        });
+                    };
+
+                    remWrapper.appendChild(bellIcon);
+                    remWrapper.appendChild(remInput);
+                    remWrapper.appendChild(remBtn);
+                    remWrapper.appendChild(remStatus);
+
+                    item.appendChild(cb);
+                    item.appendChild(input);
+                    item.appendChild(remWrapper);
+                    item.appendChild(bdayBtn);
+                    item.appendChild(del);
+                    listContainer.appendChild(item);
+                });
+
+                const addBtn = document.createElement('button');
+                addBtn.className = 'add-todo-btn';
+                addBtn.style.marginTop = '10px';
+                addBtn.textContent = '+ ADD_TASK';
+                addBtn.onclick = () => {
+                    tasks.push({ text: '', done: false });
+                    saveAndRender();
+                    setTimeout(() => {
+                        const inputs = listContainer.querySelectorAll('.todo-text');
+                        inputs[inputs.length - 1].focus();
+                    }, 10);
+                };
+                listContainer.appendChild(addBtn);
+            }
+
+            renderTasks();
+            overlay.appendChild(listContainer);
+        }
+
+        function renderCalendarView() {
+            const container = document.getElementById('calendar-view-container');
+            if (!container) return;
+            container.innerHTML = '';
+            container.style.position = 'relative';
+
+            for (let k in globalCalendarData) {
+                if (typeof globalCalendarData[k] === 'string') {
+                    const txt = globalCalendarData[k].trim();
+                    if (txt) globalCalendarData[k] = [{ text: txt, done: false }];
+                    else delete globalCalendarData[k];
+                }
+            }
+
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+
+            const header = document.createElement('div');
+            header.className = 'calendar-header';
+            
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = '<';
+            prevBtn.onclick = () => { currentCalendarDate.setMonth(month - 1); renderCalendarView(); };
+            
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = '>';
+            nextBtn.onclick = () => { currentCalendarDate.setMonth(month + 1); renderCalendarView(); };
+            
+            const title = document.createElement('div');
+            title.style.fontWeight = 'bold';
+            title.style.color = 'var(--mauve)';
+            const monthNames = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+            title.textContent = `${monthNames[month]} ${year}`;
+
+            header.appendChild(prevBtn);
+            header.appendChild(title);
+            header.appendChild(nextBtn);
+            container.appendChild(header);
+
+            const grid = document.createElement('div');
+            grid.className = 'calendar-grid';
+
+            const days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+            days.forEach(d => {
+                const dHeader = document.createElement('div');
+                dHeader.className = 'calendar-day-header';
+                dHeader.textContent = d;
+                grid.appendChild(dHeader);
+            });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const offset = firstDay === 0 ? 6 : firstDay - 1;
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            for (let i = 0; i < offset; i++) {
+                const empty = document.createElement('div');
+                empty.style.background = 'transparent';
+                grid.appendChild(empty);
+            }
+
+            const todayStr = new Date().toISOString().slice(0, 10);
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'calendar-cell';
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                
+                if (dateStr === todayStr) cell.classList.add('today');
+
+                const dateLabel = document.createElement('div');
+                dateLabel.className = 'calendar-date';
+                dateLabel.textContent = i;
+                
+                injectBirthdays(dateStr);
+                const tasks = globalCalendarData[dateStr] || [];
+                const indicators = document.createElement('div');
+                indicators.className = 'calendar-cell-indicators';
+                
+                let hasBday = false;
+                tasks.forEach(t => {
+                    if (t.isBirthday && !hasBday) {
+                        const bdayIcon = document.createElement('div');
+                        bdayIcon.className = 'cal-indicator bday';
+                        bdayIcon.textContent = '🎂';
+                        indicators.appendChild(bdayIcon);
+                        hasBday = true;
+                    } else if (!t.isBirthday) {
+                        const dot = document.createElement('div');
+                        dot.className = `cal-indicator ${t.done ? 'done' : ''}`;
+                        indicators.appendChild(dot);
+                    }
+                });
+
+                cell.appendChild(dateLabel);
+                cell.appendChild(indicators);
+                cell.onclick = () => openCalendarTodo(dateStr);
+                grid.appendChild(cell);
+            }
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.style.marginTop = '10px';
+            deleteBtn.style.transition = 'all 0.3s ease';
+            deleteBtn.textContent = 'DELETE_THIS_TAB (KEEPS DATA)';
+            deleteBtn.style.alignSelf = 'center';
+            deleteBtn.style.fontSize = '12px';
+            deleteBtn.style.background = 'transparent';
+            deleteBtn.style.border = '1px solid var(--surface0)';
+            deleteBtn.style.color = 'var(--text)';
+            deleteBtn.style.cursor = 'pointer';
+            deleteBtn.style.padding = '5px 10px';
+            
+            let armed = false;
+            deleteBtn.onclick = () => {
+                if (!armed) {
+                    armed = true;
+                    deleteBtn.style.color = 'var(--red)';
+                    deleteBtn.style.borderColor = 'var(--red)';
+                    deleteBtn.style.boxShadow = '0 0 15px var(--red)';
+                    deleteBtn.textContent = 'SURE? CLICK_AGAIN';
+                    setTimeout(() => {
+                        armed = false;
+                        deleteBtn.style.color = 'var(--text)';
+                        deleteBtn.style.borderColor = 'var(--surface0)';
+                        deleteBtn.style.boxShadow = '';
+                        deleteBtn.textContent = 'DELETE_THIS_TAB (KEEPS DATA)';
+                    }, 3000);
+                } else {
+                    const currentCat = categoriesData.find(c => c.id === activeCategoryId);
+                    currentCat.tabs = currentCat.tabs.filter(t => t.id !== activeTabId);
+                    if (currentCat.tabs.length === 0) {
+                        const newId = Date.now();
+                        currentCat.tabs.push({ id: newId, name: 'NOTES', content: '', color: 'var(--green)' });
+                        selectTab(newId);
+                    } else {
+                        selectTab(currentCat.tabs[0].id);
+                    }
+                    renderTabs();
+                }
+            };
+
+            container.appendChild(grid);
+            container.appendChild(deleteBtn);
+
+            const overlay = document.createElement('div');
+            overlay.id = 'calendar-todo-overlay';
+            overlay.style.position = 'absolute';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.right = '0';
+            overlay.style.bottom = '0';
+            overlay.style.background = 'var(--base)';
+            overlay.style.zIndex = '50';
+            overlay.style.display = 'none';
+            overlay.style.flexDirection = 'column';
+            overlay.style.padding = '10px';
+            overlay.style.boxSizing = 'border-box';
+            container.appendChild(overlay);
+        }
+
                 /** --- HELP VIEW LOGIC --- **/
         function showHelpView() {
             notesArea.style.display = 'none';
             lineNumbersDiv.style.display = 'none';
             todoListContainer.style.display = 'none';
             highlightLayer.style.display = 'none';
+            document.getElementById('calendar-view-container').style.display = 'none';
+            if (typeof renderOneTodo === 'function') renderOneTodo(null);
             helpViewContainer.style.display = 'flex';
             
             activeTabId = null;
@@ -2483,7 +3007,9 @@
                     <div class="help-item"><span class="help-key">:cat</span><span class="help-desc">Rename category ":cat Work"</span></div>
                     <div class="help-item"><span class="help-key">:title</span><span class="help-desc">Set title for current note tab ":title Test" (works in any line)</span></div>
                     <div class="help-item"><span class="help-key">:ts</span><span class="help-desc">Insert timestamp.</span></div>
+                    <div class="help-item"><span class="help-key">:onetodo</span><span class="help-desc">Add a single, fixed to-do item above the text.</span></div>
                     <div class="help-item"><span class="help-key">:todo</span><span class="help-desc">Transform current tab into an interactive Todo List.</span></div>
+                    <div class="help-item"><span class="help-key">:cal</span><span class="help-desc">Open the global Calendar grid.</span></div>
                     <div class="help-item"><span class="help-key">:help</span><span class="help-desc">Show this documentation again.</span></div>
                 </div>
                 <div class="help-section">
@@ -2515,7 +3041,7 @@
             if (oldTab && id !== activeTabId) {
                 if (oldTab.content.startsWith('!!HTML!!')) {
                     oldTab.content = '!!HTML!!' + notesArea.value;
-                } else if (!oldTab.content.startsWith('!!TODO!!')) {
+                } else if (!oldTab.content.startsWith('!!TODO!!') && !oldTab.content.startsWith('!!CAL!!')) {
                     oldTab.content = notesArea.value;
                 }
 
@@ -2527,6 +3053,8 @@
                     } catch (e) { isEmpty = true; }
                 } else if (oldTab.content.startsWith('!!HTML!!')) {
                     isEmpty = oldTab.content.replace('!!HTML!!', '').trim() === '';
+                } else if (oldTab.content.startsWith('!!CAL!!')) {
+                    isEmpty = false;
                 } else {
                     isEmpty = oldTab.content.trim() === '';
                 }
@@ -2546,6 +3074,7 @@
             
             const isTodo = targetTab && targetTab.content.startsWith('!!TODO!!');
             const isHTML = targetTab && targetTab.content.startsWith('!!HTML!!');
+            const isCal = targetTab && targetTab.content.startsWith('!!CAL!!');
 
             if (isTodo) {
                 notesArea.style.display = 'block';
@@ -2555,13 +3084,27 @@
                 lineNumbersDiv.style.display = 'none';
                 todoListContainer.style.display = 'flex';
                 renderTodoView(targetTab);
+                if (typeof renderOneTodo === 'function') renderOneTodo(null);
                 highlightLayer.style.display = 'none';
+                document.getElementById('calendar-view-container').style.display = 'none';
+            } else if (isCal) {
+                notesArea.style.display = 'block';
+                notesArea.classList.add('todo-cmd-input');
+                notesArea.value = '';
+                notesArea.placeholder = '> ENTER_COMMANDS_ (:title, :cat, :help)';
+                lineNumbersDiv.style.display = 'none';
+                todoListContainer.style.display = 'none';
+                highlightLayer.style.display = 'none';
+                if (typeof renderOneTodo === 'function') renderOneTodo(null);
+                document.getElementById('calendar-view-container').style.display = 'flex';
+                renderCalendarView();
             } else if (targetTab) {
                 notesArea.style.display = 'block';
                 notesArea.classList.remove('todo-cmd-input');
                 notesArea.placeholder = '> ENTER_DATA_';
                 lineNumbersDiv.style.display = 'block';
                 todoListContainer.style.display = 'none';
+                document.getElementById('calendar-view-container').style.display = 'none';
                 
                 if (isHTML) {
                     notesArea.value = targetTab.content.replace('!!HTML!!', '');
@@ -2575,6 +3118,7 @@
                 }
                 
                 notesArea.style.color = targetTab.color || 'var(--green)';
+                if (typeof renderOneTodo === 'function') renderOneTodo(targetTab);
             }
             
             syncNotes();
@@ -2588,7 +3132,7 @@
                         const firstTodo = todoListContainer.querySelector('.todo-text');
                         if (firstTodo) firstTodo.focus();
                     }, 0);
-                } else {
+                } else if (!isCal) {
                     setTimeout(() => notesArea.focus(), 0);
                 }
             }
@@ -2656,7 +3200,7 @@
                         const before = text.substring(0, startOfLine);
                         const after = text.substring(pos);
                         notesArea.value = before + after;
-                        if (!currentTab.content.startsWith('!!TODO!!')) {
+                    if (!currentTab.content.startsWith('!!TODO!!') && !currentTab.content.startsWith('!!CAL!!')) {
                             currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
                         }
                         notesArea.setSelectionRange(startOfLine, startOfLine);
@@ -2703,7 +3247,7 @@
                     const before = text.substring(0, startOfLine);
                     const after = text.substring(pos);
                     notesArea.value = before + after;
-                    if (!currentTab.content.startsWith('!!TODO!!')) {
+                    if (!currentTab.content.startsWith('!!TODO!!') && !currentTab.content.startsWith('!!CAL!!')) {
                         currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
                     }
                     notesArea.setSelectionRange(startOfLine, startOfLine);
@@ -2711,6 +3255,28 @@
                     syncNotes();
                     updateLineNumbers();
                     autoResizeNotes();
+                    return;
+                }
+
+                if (currentLine.toLowerCase() === ':onetodo') {
+                    e.preventDefault();
+                    const before = text.substring(0, startOfLine);
+                    const after = text.substring(pos);
+                    notesArea.value = before + after;
+                    if (!currentTab.content.startsWith('!!TODO!!') && !currentTab.content.startsWith('!!CAL!!')) {
+                        currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
+                    }
+                    notesArea.setSelectionRange(startOfLine, startOfLine);
+                    
+                    currentTab.onetodo = { text: '', done: false };
+                    syncNotes();
+                    renderOneTodo(currentTab);
+                    updateLineNumbers();
+                    autoResizeNotes();
+                    setTimeout(() => {
+                        const input = document.getElementById('onetodo-input');
+                        if (input) input.focus();
+                    }, 50);
                     return;
                 }
 
@@ -2733,7 +3299,7 @@
                     const before = text.substring(0, startOfLine);
                     const after = text.substring(pos);
                     notesArea.value = before + ts + after;
-                    if (!currentTab.content.startsWith('!!TODO!!')) {
+                    if (!currentTab.content.startsWith('!!TODO!!') && !currentTab.content.startsWith('!!CAL!!')) {
                         currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
                     }
                     const newPos = startOfLine + ts.length;
@@ -2744,12 +3310,12 @@
                     return;
                 }
 
-                if (currentLine === ':todo' || currentLine === ':help' || currentLine === ':html') {
+                if (currentLine === ':todo' || currentLine === ':help' || currentLine === ':html' || currentLine === ':cal') {
                     e.preventDefault();
                     const before = text.substring(0, startOfLine);
                     const after = text.substring(pos);
                     notesArea.value = before + after;
-                    if (!currentTab.content.startsWith('!!TODO!!')) {
+                    if (!currentTab.content.startsWith('!!TODO!!') && !currentTab.content.startsWith('!!CAL!!')) {
                         currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
                     }
                     notesArea.setSelectionRange(startOfLine, startOfLine);
@@ -2761,6 +3327,9 @@
                         showHelpView();
                     } else if (currentLine === ':html') {
                         currentTab.content = '!!HTML!!';
+                        selectTab(currentTab.id);
+                    } else if (currentLine === ':cal') {
+                        currentTab.content = '!!CAL!!';
                         selectTab(currentTab.id);
                     }
                     return;
@@ -2787,7 +3356,7 @@
         notesArea.addEventListener('input', () => {
             const { tab: currentTab } = findTab(activeTabId);
             if (currentTab) {
-                if (!currentTab.content.startsWith('!!TODO!!')) {
+                if (!currentTab.content.startsWith('!!TODO!!') && !currentTab.content.startsWith('!!CAL!!')) {
                     currentTab.content = notesArea.classList.contains('html-mode') ? '!!HTML!!' + notesArea.value : notesArea.value;
                 }
                 syncNotes();
@@ -3078,6 +3647,7 @@
                 dash_notes_tabs: localStorage.getItem('dash_notes_tabs'),
                 dash_scratchpad: localStorage.getItem('dash_scratchpad'),
                 dash_focus_data: localStorage.getItem('dash_focus_data'),
+                dash_calendar_data: localStorage.getItem('dash_calendar_data'),
                 export_date: new Date().toISOString()
             };
             
@@ -3107,6 +3677,7 @@
                     if (data.dash_notes_tabs) localStorage.setItem('dash_notes_tabs', data.dash_notes_tabs);
                     if (data.dash_scratchpad) localStorage.setItem('dash_scratchpad', data.dash_scratchpad);
                     if (data.dash_focus_data) localStorage.setItem('dash_focus_data', data.dash_focus_data);
+                    if (data.dash_calendar_data) localStorage.setItem('dash_calendar_data', data.dash_calendar_data);
                     location.reload();
                 } catch (err) {
                     alert("Fehler beim Laden: " + err.message);
@@ -3145,8 +3716,36 @@
                             }
                         } catch (e) {}
                     }
+                    
+                    if (tab.onetodo && !tab.onetodo.done && tab.onetodo.reminder && tab.onetodo.reminder.time && !tab.onetodo.reminder.notified) {
+                        const reminderTime = new Date(tab.onetodo.reminder.time).getTime();
+                        if (now >= reminderTime) {
+                            new Notification("NoteBoard Task", {
+                                body: tab.onetodo.text || "Pending task reminder!",
+                            });
+                            tab.onetodo.reminder.notified = true;
+                            needsSync = true;
+                        }
+                    }
                 });
             });
+
+            let calChanged = false;
+            Object.values(globalCalendarData).forEach(arr => {
+                if (Array.isArray(arr)) {
+                    arr.forEach(todo => {
+                        if (!todo.done && todo.reminder && todo.reminder.time && !todo.reminder.notified) {
+                            const reminderTime = new Date(todo.reminder.time).getTime();
+                            if (now >= reminderTime) {
+                                new Notification("NoteBoard Calendar", { body: todo.text || "Pending calendar reminder!" });
+                                todo.reminder.notified = true;
+                                calChanged = true;
+                            }
+                        }
+                    });
+                }
+            });
+            if (calChanged) syncConfig();
 
             if (needsSync) {
                 syncNotes();
@@ -3155,6 +3754,10 @@
                     if (activeTabInfo.tab && activeTabInfo.tab.content.startsWith('!!TODO!!')) {
                         const isTyping = document.activeElement && document.activeElement.classList.contains('todo-text');
                         if (!isTyping) renderTodoView(activeTabInfo.tab);
+                    }
+                    if (activeTabInfo.tab && activeTabInfo.tab.onetodo) {
+                        const isTypingOne = document.activeElement && document.activeElement.id === 'onetodo-input';
+                        if (!isTypingOne) renderOneTodo(activeTabInfo.tab);
                     }
                 }
             }
@@ -3176,6 +3779,11 @@
             } else {
                 focusData = { date: today, totalSeconds: 0 };
                 localStorage.setItem('dash_focus_data', JSON.stringify(focusData));
+            }
+            
+            const savedCalendar = localStorage.getItem('dash_calendar_data');
+            if (savedCalendar) {
+                try { globalCalendarData = JSON.parse(savedCalendar); } catch(e) {}
             }
 
             if (window.innerWidth <= 768) {
