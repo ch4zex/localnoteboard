@@ -36,6 +36,8 @@ This dashboard is designed to be a highly customizable and efficient personal wo
     *   Audible beep on session completion.
     *   **Focus Core Tracking:** An expandable side-panel to visually track deep-work intervals and your overall focus progress for the day.
     *   **Screenshot:** Pomodoro timer in focus mode, progress bar partially filled.
+*   **Permanent Calender**
+    *   A Calender widget that can be opened in an empty note-tab by typing ":cal". Everything inside will be saved no matter if a calender tab exists.
 *   **System Navigation & Layout:**
     *   **Task Manager:** A central sidebar widget providing an overview of all categories and tabs for rapid navigation.
     *   **Categorization:** Organize your note tabs into logical parent categories for superior structure.
@@ -53,9 +55,16 @@ This dashboard is designed to be a highly customizable and efficient personal wo
     *   `:cat [Name]` - Renames the currently active category.
     *   `:ts` - Inserts the current localized timestamp based on your configured timezone.
     *   `:tab[color]` / `:cat[color]` - Changes the accent color for the tab or category (supported: `red`, `green`, `blue`, `mauve`, `peach`).
+    *   `:onetodo` - Adds a single, fixed to-do item above the text editor. Perfect for tracking a main project goal or setting a specific reminder within a standard note without converting the entire tab into a checklist.
+
     *   `:todo` - Transforms the current tab into an interactive Todo List.
         *   **Task Reminders:** Set precise date and time reminders for individual tasks that trigger browser notifications.
         *   **Screenshot:** Notes tab converted to a todo list with a few items.
+    *   `:cal` - Transforms the tab into a Global Calendar.
+        *   Provides a visual monthly grid.
+        *   Click any day to open a dedicated task list for that specific date.
+        *   Supports standard task reminders and a special "Birthday/Yearly Repeat" toggle (🎂) that automatically schedules recurring 08:00 AM notifications.
+        *   Calendar data is globally persistent and remains safe even if you close the calendar tab.
     *   `:html` - Activates syntax highlighting for HTML, CSS, and JavaScript code within the tab.
         *   **Screenshot:** Notes tab with `:html` mode active, showing some highlighted code.
     *   `:help` - Displays a comprehensive list of all available commands and keyboard shortcuts.
