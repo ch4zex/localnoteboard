@@ -1,4 +1,8 @@
 @media (max-width: 768px) {
+    * {
+        -webkit-tap-highlight-color: transparent;
+    }
+
     html, body {
         height: 100%;
         width: 100%;
@@ -28,7 +32,6 @@
     .scratchpad-box,
     .task-manager-box,
     .links-box,
-    .dump-box,
     #tablet-overlay-toggle,
     #tablet-overlay-buttons {
         display: none !important;
@@ -128,18 +131,45 @@
     .line-numbers { font-size: 11px !important; line-height: 17px !important; width: 4ch !important; }
     .header { font-size: 9px !important; }
     .status-text { font-size: 8px !important; }
-    .tab-name-input, #category-display { font-size: 11px !important; }
-    .tab-name-input { width: 78px !important; }
-    #category-display { white-space: nowrap !important; flex-shrink: 0 !important; }
     .command-input { font-size: 16px !important; }
     .search-result-item { font-size: 10px !important; }
     .todo-datetime, .todo-reminder-btn, .todo-reminder-status { font-size: 8px !important; }
     button { font-size: 8px !important; }
     .min-btn { font-size: 14px !important; }
-    .tab-nav-btn, .add-tab-btn { font-size: 18px !important; padding: 0 2px !important; }
     .timer-input { font-size: 9px !important; }
     .focus-core-label { font-size: 9px !important; }
 
+    .notes-box .header { gap: 6px !important; padding-bottom: 6px !important; }
+    
+    #notes-tabs-container {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        touch-action: pan-x !important;
+        scrollbar-width: none !important;
+    }
+    #notes-tabs-container::-webkit-scrollbar { display: none !important; }
+    
+    #scroll-left-tabs, #scroll-right-tabs { display: none !important; }
+    
+    .note-tab { padding: 6px 12px !important; gap: 6px !important; flex-shrink: 0 !important; }
+    .tab-name-input { font-size: 12px !important; width: 75px !important; }
+    
+    #category-display {
+        font-size: 0 !important;
+        padding: 0 !important;
+        width: 32px !important;
+        height: 28px !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+    }
+    #category-display::before { font-size: 14px !important; opacity: 1 !important; margin-left: -2px !important; }
+    
+    .add-tab-btn {
+        padding: 0 !important;
+        width: 32px !important;
+        height: 28px !important;
+        font-size: 18px !important;
+    }
     .clock-box .min-btn,
     .timer-box .min-btn {
         display: none !important;
@@ -169,5 +199,37 @@
 
     #notes-area {
         min-height: 100% !important;
+    }
+
+    #calendar-view-container {
+        padding: 5px !important;
+    }
+    .calendar-header button {
+        font-size: 24px !important;
+        padding: 10px 25px !important;
+        background-color: var(--surface0) !important;
+        border-radius: 8px !important;
+    }
+    .calendar-grid {
+        gap: 2px !important;
+        flex: 0 0 auto !important;
+        min-height: 0 !important;
+    }
+    .calendar-day-header {
+        font-size: 10px !important;
+    }
+    .calendar-cell {
+        height: auto !important;
+        aspect-ratio: 1 / 1 !important;
+        padding: 3px !important;
+        min-height: 0 !important;
+    }
+    .calendar-date {
+        font-size: 16px !important;
+        margin-bottom: 0 !important;
+        text-align: center !important;
+    }
+    .calendar-cell-indicators {
+        justify-content: center !important;
     }
 }
