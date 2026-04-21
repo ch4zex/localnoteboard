@@ -200,7 +200,6 @@
             padding: 15px 0 !important;
         }
 
-        /* Vertical Resizing for Flex-Widgets */
         .all-minimized-left #left-sidebar .scratchpad-box.minimized,
         .all-minimized-right #right-sidebar .task-manager-box.minimized {
             flex: 1 !important;
@@ -240,17 +239,17 @@
             display: none; 
         }
 
-    .fullscreen-mode .command-box { display: none; }
+        .fullscreen-mode .command-box { display: none; }
 
-    .command-box {
-        grid-column: 1 / span 2;
-        grid-row: 2;
-        padding: 10px;
-        justify-content: center;
-    }
-    .clock-box { grid-column: 1; grid-row: 3; }
-    .timer-box { grid-column: 1; grid-row: 4; }
-    .links-box { grid-column: 2; grid-row: 3 / span 2; }
+        .command-box {
+            grid-column: 1 / span 2;
+            grid-row: 2;
+            padding: 10px;
+            justify-content: center;
+        }
+        .clock-box { grid-column: 1; grid-row: 3; }
+        .timer-box { grid-column: 1; grid-row: 4; }
+        .links-box { grid-column: 2; grid-row: 3 / span 2; }
 
  
         .fullscreen-mode .clock-box, 
@@ -494,22 +493,21 @@
         }
 
         .notes-box .header {
-            margin-bottom: 5px;
             position: sticky;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-        }
-
-        .notes-box .header {
-            gap: 10px;
+            gap: 6px;
             flex-wrap: nowrap;
+            align-items: center;
+            border-bottom: 1px solid var(--surface0);
+            padding-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         #notes-tabs-container {
             display: flex;
-            gap: 10px;
-            overflow-x: hidden;
+            gap: 8px;
+            overflow: hidden;
             white-space: nowrap;
             flex-grow: 1;
             flex-shrink: 1;
@@ -518,69 +516,129 @@
         }
 
         .note-tab {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 4px; 
+            gap: 6px;
             cursor: pointer;
-            padding-bottom: 1px;
-            border-bottom: 1px solid transparent;
-            transition: border-color 0.3s ease;
+            padding: 4px 10px;
+            background-color: var(--mantle);
+            border-radius: 6px;
+            border: 1px solid var(--surface0);
+            border-left: 3px solid var(--tab-color, var(--green));
+            transition: opacity 0.2s ease, background-color 0.2s ease, border-left-width 0.2s ease;
+            opacity: 0.6;
+        }
+
+        .note-tab:hover {
+            opacity: 1;
         }
 
         .note-tab.active {
-            border-bottom-color: var(--green);
+            background-color: var(--base);
+            border-color: var(--subtext0);
+            border-left: 6px solid var(--tab-color, var(--green));
+            opacity: 1;
+        }
+
+        .category-count-badge {
+            background-color: var(--surface0);
+            color: var(--subtext0);
+            font-size: 10px;
+            padding: 1px 5px;
+            border-radius: 8px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 12px;
+        }
+        .note-tab.active .category-count-badge {
+            background-color: var(--mantle);
+            color: var(--text);
         }
 
         .tab-name-input {
             background: transparent;
             border: none;
-            color: var(--subtext0);
+            color: var(--text);
             font-family: inherit;
-            font-size: 10px;
-            width: 70px;
+            font-size: 11px;
+            font-weight: 500;
+            width: 80px;
             outline: none;
-            transition: color 0.3s ease, background-color 0.2s ease;
+            transition: background-color 0.2s ease;
             text-transform: uppercase;
             text-align: center;
             cursor: inherit;
+            padding: 0;
+        }
+
+        .note-tab.active .tab-name-input {
+            font-weight: bold;
         }
 
         .tab-name-input:not([readonly]) {
             cursor: text;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+        }
+
+        .add-tab-btn, .tab-nav-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--mantle);
+            border-radius: 6px;
+            border: 1px solid var(--surface0);
+            border-left: 3px solid var(--surface0);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 4px 10px;
+            transition: opacity 0.2s ease, background-color 0.2s ease;
+            opacity: 0.6;
+            user-select: none;
+            flex-shrink: 0;
+            box-sizing: border-box;
+            text-decoration: none;
+        }
+        
+        .add-tab-btn:hover, .tab-nav-btn:hover {
+            opacity: 1;
             background-color: var(--surface0);
         }
 
-        .add-tab-btn {
-            cursor: pointer;
-            color: var(--subtext0);
-            font-size: 18px;
-            line-height: 0.5;
-            transition: color 0.2s, opacity 0.2s;
-            opacity: 0.5;
-            user-select: none;
-            flex-shrink: 0;
+        .tab-nav-btn:disabled {
+            opacity: 0.2;
+            cursor: default;
+            background-color: var(--mantle);
         }
 
-        .tab-nav-btn {
-            background: transparent;
-            border: none;
-            color: var(--subtext0);
-            font-size: 18px;
+        #category-display {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: var(--mantle);
+            color: var(--text) !important;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
             cursor: pointer;
-            padding: 0 5px;
-            transition: color 0.2s, opacity 0.2s;
-            opacity: 0.5;
-            user-select: none;
-            flex-shrink: 0;
+            transition: opacity 0.2s ease;
+            border: 1px solid var(--surface0);
+            margin-right: 6px;
+            opacity: 0.6;
+            white-space: nowrap;
         }
-        .tab-nav-btn:hover { color: var(--text); opacity: 1; }
-        .tab-nav-btn:disabled { opacity: 0.2; cursor: default; }
+        #category-display:hover { opacity: 1; }
+        #category-display::before { content: "❮"; font-size: 10px; opacity: 0.7; }
 
         .notes-box .header .decipher-text {
             flex-shrink: 0;
         }
-
-        .add-tab-btn:hover { color: var(--green); opacity: 1; }
 
         .header {
             font-size: 11px;
@@ -1350,7 +1408,7 @@
 
             <div class="box notes-box">
                 <div class="header">
-                    <span id="category-display" onclick="backToCategories()" style="color: var(--mauve); font-weight: bold; margin-left: 10px; display: none; cursor: pointer;"></span>
+                    <span id="category-display" onclick="backToCategories()" style="display: none;"></span>
                     <button id="scroll-left-tabs" class="tab-nav-btn">&lt;</button>
                     <div id="notes-tabs-container"></div>
                     <button id="scroll-right-tabs" class="tab-nav-btn">&gt;</button>
@@ -2224,18 +2282,14 @@
             
             if (viewState === 'CATEGORIES') {
                 catDisplay.style.display = 'none';
-                categoriesData.forEach(cat => {
-                    renderItem(cat, true);
-                });
+                categoriesData.forEach(cat => renderItem(cat, true));
             } else {
                 const currentCat = categoriesData.find(c => c.id === activeCategoryId);
                 if (currentCat) {
-                    catDisplay.textContent = `[ ${currentCat.name} ]`;
-                    catDisplay.style.display = 'inline';
-                    catDisplay.style.color = currentCat.color;
-                    currentCat.tabs.forEach(tab => {
-                        renderItem(tab, false);
-                    });
+                    catDisplay.textContent = currentCat.name;
+                    catDisplay.style.display = 'inline-flex';
+                    catDisplay.style.borderLeft = `3px solid ${currentCat.color || 'var(--green)'}`;
+                    currentCat.tabs.forEach(tab => renderItem(tab, false));
                 }
             }
             renderTaskManager();
@@ -2249,15 +2303,14 @@
 
             const el = document.createElement('div');
             const isActive = isCategory ? data.id == activeCategoryId : data.id == activeTabId;
-            el.className = `note-tab ${isActive ? 'active' : ''}`;
-            if (isActive) el.style.borderBottomColor = data.color;
+            el.className = `note-tab ${isActive ? 'active' : ''} ${isCategory ? 'is-category' : ''}`;
+            el.style.setProperty('--tab-color', data.color);
 
             const input = document.createElement('input');
             input.className = 'tab-name-input';
             input.value = data.name;
             input.spellcheck = false;
             input.readOnly = true;
-            input.style.fontWeight = isCategory ? 'bold' : 'normal';
             
             input.addEventListener('input', (e) => {
                 data.name = e.target.value.toUpperCase();
@@ -2275,8 +2328,6 @@
                 }
             });
 
-            input.style.color = data.color;
-
             el.addEventListener('mouseenter', () => {
                 if (input.dataset.decipherIntervalId || input.readOnly === false) return;
                 decipherEffect(input, input.value);
@@ -2291,6 +2342,13 @@
             });
 
             el.appendChild(input);
+
+            if (isCategory) {
+                const countBadge = document.createElement('span');
+                countBadge.className = 'category-count-badge';
+                countBadge.textContent = data.tabs ? data.tabs.length : 0;
+                el.appendChild(countBadge);
+            }
 
             el.onclick = () => {
                 if (isCategory) {
@@ -3402,6 +3460,15 @@
             });
             setTimeout(updateScrollButtonsState, 300);
         });
+
+        notesTabsContainer.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            notesTabsContainer.scrollBy({
+                left: e.deltaY,
+                behavior: 'smooth'
+            });
+            setTimeout(updateScrollButtonsState, 300);
+        }, { passive: false });
 
         commandInput.addEventListener('input', handleSearch);
         commandInput.addEventListener('focus', handleSearch);
